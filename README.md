@@ -42,3 +42,28 @@ Historically, flawed revenue recognition has fueled major corporate scandals, in
 
 ```json
 ```
+
+---
+
+## 📝 Usage
+> 1) Clone the repository 
+```bash
+   git clone https://github.com/antonio-backnotfront/revenue-recognition.git
+```  
+<br><br>
+> 2) Create appsettings.json in the API folder and your database connection string according to this template:
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "DefaultDatabase": "Server=your server;User ID=your user id;Password=your password;TrustServerCertificate=True;Database=your database"
+  }
+}
+
+```
