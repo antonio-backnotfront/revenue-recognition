@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevenueRecognition.API", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevenueRecognition.Application", "src\RevenueRecognition.Application\RevenueRecognition.Application.csproj", "{5DCF3176-6889-425F-AF07-B2777D895005}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevenueRecognition.Domain", "src\RevenueRecognition.Domain\RevenueRecognition.Domain.csproj", "{6F01C958-77EC-4F50-9885-60F7C7EA6A93}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevenueRecognition.Models", "src\RevenueRecognition.Models\RevenueRecognition.Models.csproj", "{6F01C958-77EC-4F50-9885-60F7C7EA6A93}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevenueRecognition.Infrastructure", "src\RevenueRecognition.Infrastructure\RevenueRecognition.Infrastructure.csproj", "{2E4A363E-8DBC-4FE0-9F50-270C09F494EC}"
 EndProject
