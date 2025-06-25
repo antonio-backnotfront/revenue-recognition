@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace RevenueRecognition.Models.Contract;
 
+[Table("ContractUpdateType")]
 [PrimaryKey(nameof(UpdateTypeId), nameof(ContractId))]
 public class ContractUpdateType
 {

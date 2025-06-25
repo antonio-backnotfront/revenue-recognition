@@ -12,7 +12,7 @@ builder.Services.AddSwaggerGen();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultDatabase");
 builder.Services.AddDbContext<CompanyDbContext>(options => options
-    .UseSqlServer(connectionString, b => b.MigrationsAssembly("RevenueRecognition.API"))
+    .UseSqlServer(connectionString)
 );
 
 var app = builder.Build();

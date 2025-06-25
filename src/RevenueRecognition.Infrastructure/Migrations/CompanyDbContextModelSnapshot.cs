@@ -3,20 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RevenueRecognition.Infrastructure.DAL;
 
 #nullable disable
 
-namespace RevenueRecognition.API.Migrations
+namespace RevenueRecognition.Infrastructure.Migrations
 {
     [DbContext(typeof(CompanyDbContext))]
-    [Migration("20250625092807_Init")]
-    partial class Init
+    partial class CompanyDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,6 +38,18 @@ namespace RevenueRecognition.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Role");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Admin"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "User"
+                        });
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Auth.User", b =>
@@ -69,6 +78,22 @@ namespace RevenueRecognition.API.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("User");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Login = "admin",
+                            Password = "admin123",
+                            RoleId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Login = "user",
+                            Password = "user123",
+                            RoleId = 2
+                        });
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Client.Client", b =>
@@ -80,20 +105,41 @@ namespace RevenueRecognition.API.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<bool?>("IsLoyal")
                         .HasColumnType("bit");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Client");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Address = "123 Main St",
+                            Email = "company@example.com",
+                            IsLoyal = true,
+                            PhoneNumber = "123456789"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Address = "456 Elm St",
+                            Email = "individual@example.com",
+                            IsLoyal = false,
+                            PhoneNumber = "987654321"
+                        });
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Client.CompanyClient", b =>
@@ -123,6 +169,15 @@ namespace RevenueRecognition.API.Migrations
                         .IsUnique();
 
                     b.ToTable("CompanyClient");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ClientId = 1,
+                            KRS = "1234567890",
+                            Name = "Example Corp"
+                        });
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Client.IndividualClient", b =>
@@ -148,8 +203,8 @@ namespace RevenueRecognition.API.Migrations
                         .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("PESEL")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)");
 
                     b.HasKey("Id");
 
@@ -157,6 +212,17 @@ namespace RevenueRecognition.API.Migrations
                         .IsUnique();
 
                     b.ToTable("IndividualClient");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ClientId = 2,
+                            FirstName = "John",
+                            IsDeleted = false,
+                            LastName = "Doe",
+                            PESEL = "12345678901"
+                        });
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Contract.Contract", b =>
@@ -198,21 +264,47 @@ namespace RevenueRecognition.API.Migrations
                     b.HasIndex("SoftwareVersionId");
 
                     b.ToTable("Contract");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ClientId = 1,
+                            EndDate = new DateTime(2025, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Paid = 500m,
+                            Price = 1000m,
+                            SignedDate = new DateTime(2024, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            SoftwareVersionId = 1,
+                            StartDate = new DateTime(2024, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            YearsOfSupport = 1
+                        });
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Contract.ContractUpdateType", b =>
                 {
-                    b.Property<int>("ContractId")
-                        .HasColumnType("int");
-
                     b.Property<int>("UpdateTypeId")
                         .HasColumnType("int");
 
-                    b.HasKey("ContractId", "UpdateTypeId");
+                    b.Property<int>("ContractId")
+                        .HasColumnType("int");
 
-                    b.HasIndex("UpdateTypeId");
+                    b.HasKey("UpdateTypeId", "ContractId");
+
+                    b.HasIndex("ContractId");
 
                     b.ToTable("ContractUpdateTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            UpdateTypeId = 1,
+                            ContractId = 1
+                        },
+                        new
+                        {
+                            UpdateTypeId = 2,
+                            ContractId = 1
+                        });
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Contract.DiscountContract", b =>
@@ -228,6 +320,13 @@ namespace RevenueRecognition.API.Migrations
                     b.HasIndex("ContractId");
 
                     b.ToTable("DiscountContract");
+
+                    b.HasData(
+                        new
+                        {
+                            DiscountId = 1,
+                            ContractId = 1
+                        });
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Contract.UpdateType", b =>
@@ -246,6 +345,18 @@ namespace RevenueRecognition.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("UpdateTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Bug Fix"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Feature"
+                        });
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Discount.Discount", b =>
@@ -272,7 +383,25 @@ namespace RevenueRecognition.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Discounts");
+                    b.ToTable("Discount");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            EndDate = new DateTime(2024, 1, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "New Year Sale",
+                            StartDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Value = 0.10m
+                        },
+                        new
+                        {
+                            Id = 2,
+                            EndDate = new DateTime(2024, 11, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Black Friday",
+                            StartDate = new DateTime(2024, 11, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Value = 0.20m
+                        });
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Software.Category", b =>
@@ -291,6 +420,18 @@ namespace RevenueRecognition.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Category");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Productivity"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Entertainment"
+                        });
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Software.Software", b =>
@@ -324,9 +465,27 @@ namespace RevenueRecognition.API.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("CurrentVersionId");
-
                     b.ToTable("Software");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CategoryId = 1,
+                            Cost = 99.99m,
+                            CurrentVersionId = 1,
+                            Description = "Task manager",
+                            Name = "SuperProductivity"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CategoryId = 2,
+                            Cost = 49.99m,
+                            CurrentVersionId = 2,
+                            Description = "Casual game",
+                            Name = "FunGame"
+                        });
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Software.SoftwareVersion", b =>
@@ -357,22 +516,47 @@ namespace RevenueRecognition.API.Migrations
 
                     b.HasIndex("SoftwareId");
 
-                    b.ToTable("SoftwareVersions");
+                    b.ToTable("SoftwareVersion");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "v1.0 release",
+                            ReleaseDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            SoftwareId = 1,
+                            VersionNumber = "1.0"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "v1.0 release",
+                            ReleaseDate = new DateTime(2023, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            SoftwareId = 2,
+                            VersionNumber = "1.0"
+                        });
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Subscription.DiscountSubscription", b =>
                 {
-                    b.Property<int>("DiscountId")
-                        .HasColumnType("int");
-
                     b.Property<int>("SubscriptionId")
                         .HasColumnType("int");
 
-                    b.HasKey("DiscountId", "SubscriptionId");
+                    b.Property<int>("DiscountId")
+                        .HasColumnType("int");
 
-                    b.HasIndex("SubscriptionId");
+                    b.HasKey("SubscriptionId", "DiscountId");
+
+                    b.HasIndex("DiscountId");
 
                     b.ToTable("DiscountSubscriptions");
+
+                    b.HasData(
+                        new
+                        {
+                            SubscriptionId = 1,
+                            DiscountId = 2
+                        });
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Subscription.RenewalPeriod", b =>
@@ -391,6 +575,18 @@ namespace RevenueRecognition.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("RenewalPeriod");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Monthly"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Yearly"
+                        });
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Subscription.Subscription", b =>
@@ -425,6 +621,17 @@ namespace RevenueRecognition.API.Migrations
                     b.HasIndex("SoftwareId");
 
                     b.ToTable("Subscriptions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ClientId = 2,
+                            Price = 9.99m,
+                            RegisterDate = new DateTime(2024, 3, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RenewalPeriodId = 1,
+                            SoftwareId = 1
+                        });
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Auth.User", b =>
@@ -443,7 +650,7 @@ namespace RevenueRecognition.API.Migrations
                     b.HasOne("RevenueRecognition.Models.Client.Client", "Client")
                         .WithOne("CompanyClient")
                         .HasForeignKey("RevenueRecognition.Models.Client.CompanyClient", "ClientId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Client");
@@ -454,7 +661,7 @@ namespace RevenueRecognition.API.Migrations
                     b.HasOne("RevenueRecognition.Models.Client.Client", "Client")
                         .WithOne("IndividualClient")
                         .HasForeignKey("RevenueRecognition.Models.Client.IndividualClient", "ClientId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Client");
@@ -525,15 +732,7 @@ namespace RevenueRecognition.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RevenueRecognition.Models.Software.SoftwareVersion", "CurrentSoftwareVersion")
-                        .WithMany()
-                        .HasForeignKey("CurrentVersionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Category");
-
-                    b.Navigation("CurrentSoftwareVersion");
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Software.SoftwareVersion", b =>

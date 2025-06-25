@@ -13,7 +13,7 @@ public class IndividualClient
     public string? FirstName { get; set; }
     [MaxLength(64)]
     public string? LastName { get; set; }
-    [MaxLength(10)]
+    [MaxLength(11)]
     public string? PESEL { get; set; }
     public bool IsDeleted { get; set; }
     [ForeignKey(nameof(ClientId))]

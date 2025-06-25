@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace RevenueRecognition.Models.Subscription;
 
-[Table("DiscountSubscriptions")]
+[Table("DiscountSubscription")]
 [PrimaryKey(nameof(SubscriptionId),nameof(DiscountId))]
 public class DiscountSubscription
 {

@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RevenueRecognition.Models.Contract;
 
+[Table("UpdateType")]
 public class UpdateType
 {
     [Key]

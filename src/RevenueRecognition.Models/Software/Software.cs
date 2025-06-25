@@ -19,6 +19,7 @@ public class Software
     [ForeignKey(nameof(CategoryId))]
     public Category Category { get; set; }
     [ForeignKey(nameof(CurrentVersionId))]
+    [NotMapped]
     public SoftwareVersion CurrentSoftwareVersion { get; set; }
     public ICollection<SoftwareVersion> Versions { get; set; }
     public ICollection<Subscription.Subscription> Subscriptions { get; set; }

@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RevenueRecognition.Models.Subscription;
 
+[Table("Subscription")]
 public class Subscription
 {
     [Key]

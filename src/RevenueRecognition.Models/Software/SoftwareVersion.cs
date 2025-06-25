@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RevenueRecognition.Models.Software;
 
-[Table("SoftwareVersions")]
+[Table("SoftwareVersion")]
 public class SoftwareVersion
 {
     [Key]
