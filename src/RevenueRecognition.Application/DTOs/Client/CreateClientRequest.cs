@@ -9,6 +9,6 @@ public class CreateClientRequest
     public int? Id { get; set; }
     [Required]
     public string Type { get; set; }
-    public CreateCompanyClientDto? CompanyClient { get; set; }
-    public CreateIndividualClientDto? IndividualClient { get; set; }
+    public CreateCompanyClientDto? CompanyInformation { get; set; }
+    public CreateIndividualClientDto? IndividualInformation { get; set; }
 }
