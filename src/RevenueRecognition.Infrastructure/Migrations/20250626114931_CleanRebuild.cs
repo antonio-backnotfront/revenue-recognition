@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RevenueRecognition.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class CleanRebuild : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -40,6 +40,19 @@ namespace RevenueRecognition.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Client", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ContractStatus",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ContractStatus", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -85,7 +98,20 @@ namespace RevenueRecognition.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UpdateTypes",
+                name: "SubscriptionStatus",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubscriptionStatus", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UpdateType",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -94,7 +120,7 @@ namespace RevenueRecognition.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UpdateTypes", x => x.Id);
+                    table.PrimaryKey("PK_UpdateType", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -208,7 +234,7 @@ namespace RevenueRecognition.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Subscriptions",
+                name: "Subscription",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -216,28 +242,35 @@ namespace RevenueRecognition.Infrastructure.Migrations
                     SoftwareId = table.Column<int>(type: "int", nullable: false),
                     ClientId = table.Column<int>(type: "int", nullable: false),
                     RenewalPeriodId = table.Column<int>(type: "int", nullable: false),
+                    SubscriptionStatusId = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(12,2)", nullable: false),
                     RegisterDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Subscriptions", x => x.Id);
+                    table.PrimaryKey("PK_Subscription", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Subscriptions_Client_ClientId",
+                        name: "FK_Subscription_Client_ClientId",
                         column: x => x.ClientId,
                         principalTable: "Client",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Subscriptions_RenewalPeriod_RenewalPeriodId",
+                        name: "FK_Subscription_RenewalPeriod_RenewalPeriodId",
                         column: x => x.RenewalPeriodId,
                         principalTable: "RenewalPeriod",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Subscriptions_Software_SoftwareId",
+                        name: "FK_Subscription_Software_SoftwareId",
                         column: x => x.SoftwareId,
                         principalTable: "Software",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Subscription_SubscriptionStatus_SubscriptionStatusId",
+                        column: x => x.SubscriptionStatusId,
+                        principalTable: "SubscriptionStatus",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -250,12 +283,12 @@ namespace RevenueRecognition.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     SoftwareVersionId = table.Column<int>(type: "int", nullable: false),
                     ClientId = table.Column<int>(type: "int", nullable: false),
+                    ContractStatusId = table.Column<int>(type: "int", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     YearsOfSupport = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(12,2)", nullable: false),
-                    Paid = table.Column<decimal>(type: "decimal(12,2)", nullable: false),
-                    SignedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Paid = table.Column<decimal>(type: "decimal(12,2)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -267,6 +300,12 @@ namespace RevenueRecognition.Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
+                        name: "FK_Contract_ContractStatus_ContractStatusId",
+                        column: x => x.ContractStatusId,
+                        principalTable: "ContractStatus",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_Contract_SoftwareVersion_SoftwareVersionId",
                         column: x => x.SoftwareVersionId,
                         principalTable: "SoftwareVersion",
@@ -275,7 +314,7 @@ namespace RevenueRecognition.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "DiscountSubscriptions",
+                name: "DiscountSubscription",
                 columns: table => new
                 {
                     SubscriptionId = table.Column<int>(type: "int", nullable: false),
@@ -283,23 +322,65 @@ namespace RevenueRecognition.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DiscountSubscriptions", x => new { x.SubscriptionId, x.DiscountId });
+                    table.PrimaryKey("PK_DiscountSubscription", x => new { x.SubscriptionId, x.DiscountId });
                     table.ForeignKey(
-                        name: "FK_DiscountSubscriptions_Discount_DiscountId",
+                        name: "FK_DiscountSubscription_Discount_DiscountId",
                         column: x => x.DiscountId,
                         principalTable: "Discount",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DiscountSubscriptions_Subscriptions_SubscriptionId",
+                        name: "FK_DiscountSubscription_Subscription_SubscriptionId",
                         column: x => x.SubscriptionId,
-                        principalTable: "Subscriptions",
+                        principalTable: "Subscription",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ContractUpdateTypes",
+                name: "SubscriptionPayment",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SubscriptionId = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(12,2)", nullable: false),
+                    PaidAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubscriptionPayment", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SubscriptionPayment_Subscription_SubscriptionId",
+                        column: x => x.SubscriptionId,
+                        principalTable: "Subscription",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ContractPayment",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ContractId = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(12,2)", nullable: false),
+                    PaidAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ContractPayment", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ContractPayment_Contract_ContractId",
+                        column: x => x.ContractId,
+                        principalTable: "Contract",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ContractUpdateType",
                 columns: table => new
                 {
                     UpdateTypeId = table.Column<int>(type: "int", nullable: false),
@@ -307,17 +388,17 @@ namespace RevenueRecognition.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ContractUpdateTypes", x => new { x.UpdateTypeId, x.ContractId });
+                    table.PrimaryKey("PK_ContractUpdateType", x => new { x.UpdateTypeId, x.ContractId });
                     table.ForeignKey(
-                        name: "FK_ContractUpdateTypes_Contract_ContractId",
+                        name: "FK_ContractUpdateType_Contract_ContractId",
                         column: x => x.ContractId,
                         principalTable: "Contract",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ContractUpdateTypes_UpdateTypes_UpdateTypeId",
+                        name: "FK_ContractUpdateType_UpdateType_UpdateTypeId",
                         column: x => x.UpdateTypeId,
-                        principalTable: "UpdateTypes",
+                        principalTable: "UpdateType",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -365,12 +446,22 @@ namespace RevenueRecognition.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "ContractStatus",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Paid" },
+                    { 2, "Active" },
+                    { 3, "Cancelled" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "Discount",
                 columns: new[] { "Id", "EndDate", "Name", "StartDate", "Value" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2024, 1, 31, 0, 0, 0, 0, DateTimeKind.Unspecified), "New Year Sale", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 0.10m },
-                    { 2, new DateTime(2024, 11, 30, 0, 0, 0, 0, DateTimeKind.Unspecified), "Black Friday", new DateTime(2024, 11, 25, 0, 0, 0, 0, DateTimeKind.Unspecified), 0.20m }
+                    { 1, new DateTime(2024, 1, 31, 0, 0, 0, 0, DateTimeKind.Unspecified), "New Year Sale", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 10m },
+                    { 2, new DateTime(2024, 11, 30, 0, 0, 0, 0, DateTimeKind.Unspecified), "Black Friday", new DateTime(2024, 11, 25, 0, 0, 0, 0, DateTimeKind.Unspecified), 20m }
                 });
 
             migrationBuilder.InsertData(
@@ -392,7 +483,16 @@ namespace RevenueRecognition.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "UpdateTypes",
+                table: "SubscriptionStatus",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Active" },
+                    { 2, "Suspended" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "UpdateType",
                 columns: new[] { "Id", "Name" },
                 values: new object[,]
                 {
@@ -438,22 +538,41 @@ namespace RevenueRecognition.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Subscriptions",
-                columns: new[] { "Id", "ClientId", "Price", "RegisterDate", "RenewalPeriodId", "SoftwareId" },
-                values: new object[] { 1, 2, 9.99m, new DateTime(2024, 3, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, 1 });
+                table: "Subscription",
+                columns: new[] { "Id", "ClientId", "Price", "RegisterDate", "RenewalPeriodId", "SoftwareId", "SubscriptionStatusId" },
+                values: new object[] { 1, 2, 9.99m, new DateTime(2025, 4, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, 1, 1 });
 
             migrationBuilder.InsertData(
                 table: "Contract",
-                columns: new[] { "Id", "ClientId", "EndDate", "Paid", "Price", "SignedDate", "SoftwareVersionId", "StartDate", "YearsOfSupport" },
-                values: new object[] { 1, 1, new DateTime(2025, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), 500m, 1000m, new DateTime(2024, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, new DateTime(2024, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), 1 });
+                columns: new[] { "Id", "ClientId", "ContractStatusId", "EndDate", "Paid", "Price", "SoftwareVersionId", "StartDate", "YearsOfSupport" },
+                values: new object[] { 1, 1, 2, new DateTime(2025, 7, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), 500m, 1000m, 1, new DateTime(2025, 6, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), 1 });
 
             migrationBuilder.InsertData(
-                table: "DiscountSubscriptions",
+                table: "DiscountSubscription",
                 columns: new[] { "DiscountId", "SubscriptionId" },
                 values: new object[] { 2, 1 });
 
             migrationBuilder.InsertData(
-                table: "ContractUpdateTypes",
+                table: "SubscriptionPayment",
+                columns: new[] { "Id", "Amount", "PaidAt", "SubscriptionId" },
+                values: new object[,]
+                {
+                    { 1, 9.99m, new DateTime(2025, 4, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1 },
+                    { 2, 9.99m, new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1 },
+                    { 3, 9.99m, new DateTime(2025, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "ContractPayment",
+                columns: new[] { "Id", "Amount", "ContractId", "PaidAt" },
+                values: new object[,]
+                {
+                    { 1, 300m, 1, new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 2, 200m, 1, new DateTime(2025, 6, 20, 0, 0, 0, 0, DateTimeKind.Unspecified) }
+                });
+
+            migrationBuilder.InsertData(
+                table: "ContractUpdateType",
                 columns: new[] { "ContractId", "UpdateTypeId" },
                 values: new object[,]
                 {
@@ -478,13 +597,23 @@ namespace RevenueRecognition.Infrastructure.Migrations
                 column: "ClientId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Contract_ContractStatusId",
+                table: "Contract",
+                column: "ContractStatusId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Contract_SoftwareVersionId",
                 table: "Contract",
                 column: "SoftwareVersionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ContractUpdateTypes_ContractId",
-                table: "ContractUpdateTypes",
+                name: "IX_ContractPayment_ContractId",
+                table: "ContractPayment",
+                column: "ContractId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ContractUpdateType_ContractId",
+                table: "ContractUpdateType",
                 column: "ContractId");
 
             migrationBuilder.CreateIndex(
@@ -493,8 +622,8 @@ namespace RevenueRecognition.Infrastructure.Migrations
                 column: "ContractId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DiscountSubscriptions_DiscountId",
-                table: "DiscountSubscriptions",
+                name: "IX_DiscountSubscription_DiscountId",
+                table: "DiscountSubscription",
                 column: "DiscountId");
 
             migrationBuilder.CreateIndex(
@@ -514,19 +643,29 @@ namespace RevenueRecognition.Infrastructure.Migrations
                 column: "SoftwareId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Subscriptions_ClientId",
-                table: "Subscriptions",
+                name: "IX_Subscription_ClientId",
+                table: "Subscription",
                 column: "ClientId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Subscriptions_RenewalPeriodId",
-                table: "Subscriptions",
+                name: "IX_Subscription_RenewalPeriodId",
+                table: "Subscription",
                 column: "RenewalPeriodId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Subscriptions_SoftwareId",
-                table: "Subscriptions",
+                name: "IX_Subscription_SoftwareId",
+                table: "Subscription",
                 column: "SoftwareId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Subscription_SubscriptionStatusId",
+                table: "Subscription",
+                column: "SubscriptionStatusId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubscriptionPayment_SubscriptionId",
+                table: "SubscriptionPayment",
+                column: "SubscriptionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_User_RoleId",
@@ -541,22 +680,28 @@ namespace RevenueRecognition.Infrastructure.Migrations
                 name: "CompanyClient");
 
             migrationBuilder.DropTable(
-                name: "ContractUpdateTypes");
+                name: "ContractPayment");
+
+            migrationBuilder.DropTable(
+                name: "ContractUpdateType");
 
             migrationBuilder.DropTable(
                 name: "DiscountContract");
 
             migrationBuilder.DropTable(
-                name: "DiscountSubscriptions");
+                name: "DiscountSubscription");
 
             migrationBuilder.DropTable(
                 name: "IndividualClient");
 
             migrationBuilder.DropTable(
+                name: "SubscriptionPayment");
+
+            migrationBuilder.DropTable(
                 name: "User");
 
             migrationBuilder.DropTable(
-                name: "UpdateTypes");
+                name: "UpdateType");
 
             migrationBuilder.DropTable(
                 name: "Contract");
@@ -565,10 +710,13 @@ namespace RevenueRecognition.Infrastructure.Migrations
                 name: "Discount");
 
             migrationBuilder.DropTable(
-                name: "Subscriptions");
+                name: "Subscription");
 
             migrationBuilder.DropTable(
                 name: "Role");
+
+            migrationBuilder.DropTable(
+                name: "ContractStatus");
 
             migrationBuilder.DropTable(
                 name: "SoftwareVersion");
@@ -578,6 +726,9 @@ namespace RevenueRecognition.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "RenewalPeriod");
+
+            migrationBuilder.DropTable(
+                name: "SubscriptionStatus");
 
             migrationBuilder.DropTable(
                 name: "Software");

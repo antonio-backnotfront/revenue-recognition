@@ -24,7 +24,9 @@ public class CompanyDbContext : DbContext
 
     public DbSet<Discount> Discounts { get; set; }
 
+    public DbSet<ContractStatus> ContractStatuses { get; set; }
     public DbSet<Contract> Contracts { get; set; }
+    public DbSet<ContractPayment> ContractPayments { get; set; }
     public DbSet<UpdateType> UpdateTypes { get; set; }
     public DbSet<ContractUpdateType> ContractUpdateTypes { get; set; }
     public DbSet<DiscountContract> DiscountContracts { get; set; }
@@ -33,12 +35,14 @@ public class CompanyDbContext : DbContext
     public DbSet<Software> Softwares { get; set; }
     public DbSet<SoftwareVersion> SoftwareVersions { get; set; }
 
+    public DbSet<SubscriptionStatus> SubscriptionStatuses { get; set; }
     public DbSet<RenewalPeriod> RenewalPeriods { get; set; }
     public DbSet<Subscription> Subscriptions { get; set; }
     public DbSet<DiscountSubscription> DiscountSubscriptions { get; set; }
+    public DbSet<SubscriptionPayment> SubscriptionPayments { get; set; }
 
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+        
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
@@ -73,6 +77,24 @@ public class CompanyDbContext : DbContext
             new IndividualClient
                 { Id = 1, ClientId = 2, FirstName = "John", LastName = "Doe", PESEL = "12345678901", IsDeleted = false }
         );
+        
+        modelBuilder.Entity<ContractStatus>().HasData(
+            new ContractStatus
+                { Id = 1, Name = "Paid"},
+            new ContractStatus
+                { Id = 2, Name = "Active"},
+            new ContractStatus
+                { Id = 3, Name = "Cancelled"}
+        );
+        
+        modelBuilder.Entity<SubscriptionStatus>().HasData(
+            new SubscriptionStatus
+                { Id = 1, Name = "Active"},
+            new SubscriptionStatus
+                { Id = 2, Name = "Suspended"}
+        );
+        
+        
 
         modelBuilder.Entity<Category>().HasData(
             new Category { Id = 1, Name = "Productivity" },
@@ -114,12 +136,12 @@ public class CompanyDbContext : DbContext
             new Discount
             {
                 Id = 1, Name = "New Year Sale", StartDate = new DateTime(2024, 1, 1),
-                EndDate = new DateTime(2024, 1, 31), Value = 0.10m
+                EndDate = new DateTime(2024, 1, 31), Value = 10m
             },
             new Discount
             {
                 Id = 2, Name = "Black Friday", StartDate = new DateTime(2024, 11, 25),
-                EndDate = new DateTime(2024, 11, 30), Value = 0.20m
+                EndDate = new DateTime(2024, 11, 30), Value = 20m
             }
         );
 
@@ -130,13 +152,31 @@ public class CompanyDbContext : DbContext
                 ClientId = 1,
                 Price = 1000m,
                 Paid = 500m,
-                SignedDate = new DateTime(2024, 1, 10),
-                StartDate = new DateTime(2024, 1, 10),
-                EndDate = new DateTime(2025, 1, 10),
+                StartDate = new DateTime(2025, 6, 10),
+                EndDate = new DateTime(2025, 7, 5),
                 SoftwareVersionId = 1,
-                YearsOfSupport = 1
+                YearsOfSupport = 1,
+                ContractStatusId = 2
             }
         );
+        
+        modelBuilder.Entity<ContractPayment>().HasData(
+            new ContractPayment
+            {
+                Id = 1,
+                ContractId = 1,
+                Amount = 300m,
+                PaidAt = new DateTime(2025, 6, 15)
+            },
+            new ContractPayment
+            {
+                Id = 2,
+                ContractId = 1,
+                Amount = 200m,
+                PaidAt = new DateTime(2025, 6, 20)
+            }
+        );
+
 
         modelBuilder.Entity<ContractUpdateType>().HasData(
             new ContractUpdateType { ContractId = 1, UpdateTypeId = 1 },
@@ -160,9 +200,35 @@ public class CompanyDbContext : DbContext
                 SoftwareId = 1,
                 RenewalPeriodId = 1,
                 Price = 9.99m,
-                RegisterDate = new DateTime(2024, 3, 1)
+                RegisterDate = new DateTime(2025, 4, 1),
+                SubscriptionStatusId = 1
             }
         );
+        
+        modelBuilder.Entity<SubscriptionPayment>().HasData(
+            new SubscriptionPayment
+            {
+                Id = 1,
+                SubscriptionId = 1,
+                Amount = 9.99m,
+                PaidAt = new DateTime(2025, 4, 1)
+            },
+            new SubscriptionPayment
+            {
+                Id = 2,
+                SubscriptionId = 1,
+                Amount = 9.99m,
+                PaidAt = new DateTime(2025, 5, 1)
+            },
+            new SubscriptionPayment
+            {
+                Id = 3,
+                SubscriptionId = 1,
+                Amount = 9.99m,
+                PaidAt = new DateTime(2025, 6, 1)
+            }
+        );
+
 
         modelBuilder.Entity<DiscountSubscription>().HasData(
             new DiscountSubscription { DiscountId = 2, SubscriptionId = 1 }

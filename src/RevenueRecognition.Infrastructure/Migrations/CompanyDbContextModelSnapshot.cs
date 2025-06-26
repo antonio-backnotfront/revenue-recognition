@@ -236,6 +236,9 @@ namespace RevenueRecognition.Infrastructure.Migrations
                     b.Property<int>("ClientId")
                         .HasColumnType("int");
 
+                    b.Property<int>("ContractStatusId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
@@ -244,9 +247,6 @@ namespace RevenueRecognition.Infrastructure.Migrations
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(12, 2)");
-
-                    b.Property<DateTime>("SignedDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("SoftwareVersionId")
                         .HasColumnType("int");
@@ -261,6 +261,8 @@ namespace RevenueRecognition.Infrastructure.Migrations
 
                     b.HasIndex("ClientId");
 
+                    b.HasIndex("ContractStatusId");
+
                     b.HasIndex("SoftwareVersionId");
 
                     b.ToTable("Contract");
@@ -270,13 +272,88 @@ namespace RevenueRecognition.Infrastructure.Migrations
                         {
                             Id = 1,
                             ClientId = 1,
-                            EndDate = new DateTime(2025, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            ContractStatusId = 2,
+                            EndDate = new DateTime(2025, 7, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Paid = 500m,
                             Price = 1000m,
-                            SignedDate = new DateTime(2024, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             SoftwareVersionId = 1,
-                            StartDate = new DateTime(2024, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            StartDate = new DateTime(2025, 6, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             YearsOfSupport = 1
+                        });
+                });
+
+            modelBuilder.Entity("RevenueRecognition.Models.Contract.ContractPayment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(12, 2)");
+
+                    b.Property<int>("ContractId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("PaidAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContractId");
+
+                    b.ToTable("ContractPayment");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Amount = 300m,
+                            ContractId = 1,
+                            PaidAt = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Amount = 200m,
+                            ContractId = 1,
+                            PaidAt = new DateTime(2025, 6, 20, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
+                });
+
+            modelBuilder.Entity("RevenueRecognition.Models.Contract.ContractStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ContractStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Paid"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Active"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Cancelled"
                         });
                 });
 
@@ -392,7 +469,7 @@ namespace RevenueRecognition.Infrastructure.Migrations
                             EndDate = new DateTime(2024, 1, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "New Year Sale",
                             StartDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Value = 0.10m
+                            Value = 10m
                         },
                         new
                         {
@@ -400,7 +477,7 @@ namespace RevenueRecognition.Infrastructure.Migrations
                             EndDate = new DateTime(2024, 11, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Black Friday",
                             StartDate = new DateTime(2024, 11, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Value = 0.20m
+                            Value = 20m
                         });
                 });
 
@@ -612,6 +689,9 @@ namespace RevenueRecognition.Infrastructure.Migrations
                     b.Property<int>("SoftwareId")
                         .HasColumnType("int");
 
+                    b.Property<int>("SubscriptionStatusId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ClientId");
@@ -619,6 +699,8 @@ namespace RevenueRecognition.Infrastructure.Migrations
                     b.HasIndex("RenewalPeriodId");
 
                     b.HasIndex("SoftwareId");
+
+                    b.HasIndex("SubscriptionStatusId");
 
                     b.ToTable("Subscription");
 
@@ -628,9 +710,87 @@ namespace RevenueRecognition.Infrastructure.Migrations
                             Id = 1,
                             ClientId = 2,
                             Price = 9.99m,
-                            RegisterDate = new DateTime(2024, 3, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RegisterDate = new DateTime(2025, 4, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             RenewalPeriodId = 1,
-                            SoftwareId = 1
+                            SoftwareId = 1,
+                            SubscriptionStatusId = 1
+                        });
+                });
+
+            modelBuilder.Entity("RevenueRecognition.Models.Subscription.SubscriptionPayment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(12, 2)");
+
+                    b.Property<DateTime>("PaidAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SubscriptionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubscriptionId");
+
+                    b.ToTable("SubscriptionPayment");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Amount = 9.99m,
+                            PaidAt = new DateTime(2025, 4, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            SubscriptionId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Amount = 9.99m,
+                            PaidAt = new DateTime(2025, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            SubscriptionId = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Amount = 9.99m,
+                            PaidAt = new DateTime(2025, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            SubscriptionId = 1
+                        });
+                });
+
+            modelBuilder.Entity("RevenueRecognition.Models.Subscription.SubscriptionStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SubscriptionStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Active"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Suspended"
                         });
                 });
 
@@ -675,6 +835,12 @@ namespace RevenueRecognition.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("RevenueRecognition.Models.Contract.ContractStatus", "ContractStatus")
+                        .WithMany("Contracts")
+                        .HasForeignKey("ContractStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("RevenueRecognition.Models.Software.SoftwareVersion", "SoftwareVersion")
                         .WithMany("Contracts")
                         .HasForeignKey("SoftwareVersionId")
@@ -683,7 +849,20 @@ namespace RevenueRecognition.Infrastructure.Migrations
 
                     b.Navigation("Client");
 
+                    b.Navigation("ContractStatus");
+
                     b.Navigation("SoftwareVersion");
+                });
+
+            modelBuilder.Entity("RevenueRecognition.Models.Contract.ContractPayment", b =>
+                {
+                    b.HasOne("RevenueRecognition.Models.Contract.Contract", "Contract")
+                        .WithMany("ContractPayments")
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Contract");
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Contract.ContractUpdateType", b =>
@@ -785,11 +964,30 @@ namespace RevenueRecognition.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("RevenueRecognition.Models.Subscription.SubscriptionStatus", "SubscriptionStatus")
+                        .WithMany("Subscriptions")
+                        .HasForeignKey("SubscriptionStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Client");
 
                     b.Navigation("RenewalPeriod");
 
                     b.Navigation("Software");
+
+                    b.Navigation("SubscriptionStatus");
+                });
+
+            modelBuilder.Entity("RevenueRecognition.Models.Subscription.SubscriptionPayment", b =>
+                {
+                    b.HasOne("RevenueRecognition.Models.Subscription.Subscription", "Subscription")
+                        .WithMany("SubscriptionPayments")
+                        .HasForeignKey("SubscriptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Subscription");
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Auth.Role", b =>
@@ -810,9 +1008,16 @@ namespace RevenueRecognition.Infrastructure.Migrations
 
             modelBuilder.Entity("RevenueRecognition.Models.Contract.Contract", b =>
                 {
+                    b.Navigation("ContractPayments");
+
                     b.Navigation("ContractUpdateTypes");
 
                     b.Navigation("DiscountContracts");
+                });
+
+            modelBuilder.Entity("RevenueRecognition.Models.Contract.ContractStatus", b =>
+                {
+                    b.Navigation("Contracts");
                 });
 
             modelBuilder.Entity("RevenueRecognition.Models.Contract.UpdateType", b =>
@@ -852,6 +1057,13 @@ namespace RevenueRecognition.Infrastructure.Migrations
             modelBuilder.Entity("RevenueRecognition.Models.Subscription.Subscription", b =>
                 {
                     b.Navigation("DiscountSubscriptions");
+
+                    b.Navigation("SubscriptionPayments");
+                });
+
+            modelBuilder.Entity("RevenueRecognition.Models.Subscription.SubscriptionStatus", b =>
+                {
+                    b.Navigation("Subscriptions");
                 });
 #pragma warning restore 612, 618
         }
