@@ -1,4 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using RevenueRecognition.Application.Services.Client;
+using RevenueRecognition.Application.Services.Contract;
+using RevenueRecognition.Application.Services.Revenue;
+using RevenueRecognition.Application.Services.Subscription;
 using RevenueRecognition.Infrastructure.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +13,11 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IRevenueService, RevenueService>();
+builder.Services.AddScoped<IContractService, ContractService>();
+builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultDatabase");
 builder.Services.AddDbContext<CompanyDbContext>(options => options
