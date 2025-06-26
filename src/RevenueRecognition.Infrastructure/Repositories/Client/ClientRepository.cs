@@ -21,7 +21,7 @@ public class ClientRepository : IClientRepository
                 client =>
                     !string.IsNullOrEmpty(client.Email)
                     &&
-                    client.Email.Equals(email, StringComparison.OrdinalIgnoreCase)
+                    client.Email.Equals(email)
                 , cancellationToken
             );
     }
@@ -33,7 +33,7 @@ public class ClientRepository : IClientRepository
                 client =>
                     !string.IsNullOrEmpty(client.PhoneNumber)
                     &&
-                    client.PhoneNumber.Equals(phoneNumber, StringComparison.OrdinalIgnoreCase),
+                    client.PhoneNumber.Equals(phoneNumber),
                 cancellationToken
             );
     }
@@ -45,7 +45,7 @@ public class ClientRepository : IClientRepository
                 client =>
                     !string.IsNullOrEmpty(client.PESEL)
                     &&
-                    client.PESEL.Equals(pesel, StringComparison.OrdinalIgnoreCase),
+                    client.PESEL.Equals(pesel),
                 cancellationToken
             );
     }

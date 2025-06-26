@@ -22,6 +22,7 @@ public class UnitOfWork : IUnitOfWork
     {
         if (_transaction != null)
         {
+            await _context.SaveChangesAsync(cancellationToken);
             await _transaction.CommitAsync(cancellationToken);
             await _transaction.DisposeAsync();
         }

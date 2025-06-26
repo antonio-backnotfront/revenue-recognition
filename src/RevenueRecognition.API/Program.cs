@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RevenueRecognition.API.Middlewares;
 using RevenueRecognition.Application.Services.Client;
 using RevenueRecognition.Application.Services.Contract;
 using RevenueRecognition.Application.Services.Revenue;
@@ -7,6 +8,7 @@ using RevenueRecognition.Infrastructure.DAL;
 using RevenueRecognition.Infrastructure.Repositories.Client;
 using RevenueRecognition.Infrastructure.Repositories.Contract;
 using RevenueRecognition.Infrastructure.Repositories.Subscription;
+using RevenueRecognition.Infrastructure.Repositories.UnitOfWork;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +19,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IRevenueService, RevenueService>();
 builder.Services.AddScoped<IContractService, ContractService>();
 builder.Services.AddScoped<IClientService, ClientService>();
@@ -43,6 +46,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 app.MapControllers();
 

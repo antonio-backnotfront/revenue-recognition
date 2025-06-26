@@ -1,6 +1,6 @@
 namespace RevenueRecognition.Application.Exceptions;
 
-public class BadRequestException : Exception
+public class BadRequestException : ApplicationException
 {
-    public BadRequestException(string msg) : base(msg){} 
+    public BadRequestException(string msg) : base(msg, 400){} 
 }
