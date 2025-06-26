@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RevenueRecognition.Application.DTOs.Subscription;
 
-public class CreateSubscriptionDto
+public class CreateSubscriptionRequest
 {
     [Required] public int SoftwareId { get; set; }
     [Required] public int ClientId { get; set; }

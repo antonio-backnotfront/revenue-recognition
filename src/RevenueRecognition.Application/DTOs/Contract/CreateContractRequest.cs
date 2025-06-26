@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RevenueRecognition.Application.DTOs.Contract;
 
-public class CreateContractDto
+public class CreateContractRequest
 {
     [Required] public int SoftwareVersionId { get; set; }
     [Required] public int ClientId { get; set; }

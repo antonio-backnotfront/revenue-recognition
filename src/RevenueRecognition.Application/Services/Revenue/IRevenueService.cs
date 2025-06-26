@@ -1,4 +1,4 @@
-namespace RevenueRecognition.Application.Services.Client;
+namespace RevenueRecognition.Application.Services.Revenue;
 
 public interface IRevenueService
 {
