@@ -4,6 +4,9 @@ using RevenueRecognition.Application.Services.Contract;
 using RevenueRecognition.Application.Services.Revenue;
 using RevenueRecognition.Application.Services.Subscription;
 using RevenueRecognition.Infrastructure.DAL;
+using RevenueRecognition.Infrastructure.Repositories.Client;
+using RevenueRecognition.Infrastructure.Repositories.Contract;
+using RevenueRecognition.Infrastructure.Repositories.Subscription;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +21,10 @@ builder.Services.AddScoped<IRevenueService, RevenueService>();
 builder.Services.AddScoped<IContractService, ContractService>();
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+
+builder.Services.AddScoped<IClientRepository, ClientRepository>();
+builder.Services.AddScoped<IContractRepository, ContractRepository>();
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultDatabase");
 builder.Services.AddDbContext<CompanyDbContext>(options => options
