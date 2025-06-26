@@ -89,13 +89,12 @@ public interface IClientRepository
         bool isLoyal,
         CancellationToken cancellationToken
     );
-    public Task<bool> IsIndividualClientDeletedByClientIdAsync(
+    public Task<bool> IsDeletedByClientId(
         int id,
         CancellationToken cancellationToken
     );
-    public Task<bool> SetIsIndividualClientDeletedByClientIdAsync(
+    public Task<bool> SoftDeleteByClientId(
         int id,
-        bool isDeleted,
         CancellationToken cancellationToken
     );
 }

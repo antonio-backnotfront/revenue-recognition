@@ -39,7 +39,7 @@ public class ClientController : ControllerBase
             ? StatusCode(200, await _service.GetClientByIdAsync(id, cancellationToken))
             : StatusCode(404, new
             {
-                type = $"https://httpstatuses.com/404", 
+                type = $"https://httpstatuses.com/404",
                 title = $"Client with id {id} not found.",
                 status = 404,
             });
@@ -51,16 +51,29 @@ public class ClientController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        CreateClientRequest? createdClient = await _service.CreateClientAsync(request, cancellationToken);
-        if (createdClient != null)
-        {
-            return CreatedAtAction(nameof(GetClientByIdAsync), new { Id = createdClient.Id }, createdClient);
-        }
-        return StatusCode(500, new
-        {
-            type="https://httpstatuses.com/500",
-            title="Could not create client",
-            status=500 
-        });
+        GetClientResponse createdClient = await _service.CreateClientAsync(request, cancellationToken);
+        _logger.LogInformation("Created client: {@Created}", createdClient);
+        return CreatedAtAction(nameof(GetClientByIdAsync), new { Id = createdClient.Id }, createdClient);
+    }
+
+    [HttpPatch("{id}")]
+    public async Task<IActionResult> UpdateClientAsync(
+        int id,
+        UpdateClientDto dto,
+        CancellationToken cancellationToken
+    )
+    {
+        GetClientResponse updatedClient = await _service.UpdateClientAsync(id, dto, cancellationToken);
+        return Ok(updatedClient);
+    }
+    [HttpDelete("{id}")]
+    
+    public async Task<IActionResult> UpdateClientAsync(
+        int id,
+        CancellationToken cancellationToken
+    )
+    {
+        await _service.RemoveClientAsync(id, cancellationToken);
+        return NoContent();
     }
 }

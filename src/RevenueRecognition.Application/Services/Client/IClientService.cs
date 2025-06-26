@@ -8,7 +8,7 @@ public interface IClientService
         CancellationToken cancellationToken
     );
 
-    public Task<CreateClientRequest?> CreateClientAsync(
+    public Task<GetClientResponse> CreateClientAsync(
         CreateClientRequest request,
         CancellationToken cancellationToken
     );

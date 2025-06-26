@@ -88,6 +88,8 @@ public class ClientRepository : IClientRepository
     public async Task<Client?> GetClientByIdAsync(int id, CancellationToken cancellationToken)
     {
         return await _context.Clients
+            .Include(c => c.IndividualClient)
+            .Include(c => c.CompanyClient)
             .FirstOrDefaultAsync(client => client.Id == id, cancellationToken);
     }
 
@@ -114,7 +116,9 @@ public class ClientRepository : IClientRepository
         CancellationToken cancellationToken
     )
     {
-        return (await _context.Clients.AddAsync(client, cancellationToken)).Entity;
+        Client createdClient = (await _context.Clients.AddAsync(client, cancellationToken)).Entity;
+        await _context.SaveChangesAsync(cancellationToken);
+        return createdClient;
     }
 
     public async Task<IndividualClient> InsertIndividualClientAsync(
@@ -122,7 +126,9 @@ public class ClientRepository : IClientRepository
         CancellationToken cancellationToken
     )
     {
-        return (await _context.IndividualClients.AddAsync(client, cancellationToken)).Entity;
+        IndividualClient createdClient = (await _context.IndividualClients.AddAsync(client, cancellationToken)).Entity;
+        await _context.SaveChangesAsync(cancellationToken);
+        return createdClient;
     }
 
     public async Task<CompanyClient> InsertCompanyClientAsync(
@@ -130,7 +136,9 @@ public class ClientRepository : IClientRepository
         CancellationToken cancellationToken
     )
     {
-        return (await _context.CompanyClients.AddAsync(client, cancellationToken)).Entity;
+        CompanyClient createdClient = (await _context.CompanyClients.AddAsync(client, cancellationToken)).Entity;
+        await _context.SaveChangesAsync(cancellationToken);
+        return createdClient;
     }
 
     public async Task<bool> UpdateClientAsync(
@@ -145,6 +153,7 @@ public class ClientRepository : IClientRepository
             c.Address = client.Address;
             c.Email = client.Email;
             c.PhoneNumber = client.PhoneNumber;
+            await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
 
@@ -163,6 +172,7 @@ public class ClientRepository : IClientRepository
             c.PESEL = client.PESEL;
             c.FirstName = client.FirstName;
             c.LastName = client.LastName;
+            await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
 
@@ -180,7 +190,7 @@ public class ClientRepository : IClientRepository
         {
             c.KRS = client.KRS;
             c.Name = client.Name;
-
+            await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
 
@@ -214,13 +224,14 @@ public class ClientRepository : IClientRepository
         if (client != null)
         {
             client.IsLoyal = isLoyal;
+            await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
 
         return false;
     }
 
-    public async Task<bool> IsIndividualClientDeletedByClientIdAsync(
+    public async Task<bool> IsDeletedByClientId(
         int id,
         CancellationToken cancellationToken
     )
@@ -236,9 +247,8 @@ public class ClientRepository : IClientRepository
         return false;
     }
 
-    public async Task<bool> SetIsIndividualClientDeletedByClientIdAsync(
+    public async Task<bool> SoftDeleteByClientId(
         int id,
-        bool isDeleted,
         CancellationToken cancellationToken
     )
     {
@@ -247,10 +257,10 @@ public class ClientRepository : IClientRepository
                 .FirstOrDefaultAsync(client => client.ClientId == id, cancellationToken);
         if (client != null)
         {
-            client.IsDeleted = isDeleted;
+            client.IsDeleted = true;
+            await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
-
         return false;
     }
 }
