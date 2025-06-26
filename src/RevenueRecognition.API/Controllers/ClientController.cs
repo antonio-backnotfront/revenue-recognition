@@ -37,7 +37,12 @@ public class ClientController : ControllerBase
         GetClientResponse? response = await _service.GetClientByIdAsync(id, cancellationToken);
         return response != null
             ? StatusCode(200, await _service.GetClientByIdAsync(id, cancellationToken))
-            : StatusCode(404, new {status = 404, title = $"Client with id {id} not found."});
+            : StatusCode(404, new
+            {
+                type = $"https://httpstatuses.com/404", 
+                title = $"Client with id {id} not found.",
+                status = 404,
+            });
     }
 
     [HttpPost]
@@ -51,6 +56,11 @@ public class ClientController : ControllerBase
         {
             return CreatedAtAction(nameof(GetClientByIdAsync), new { Id = createdClient.Id }, createdClient);
         }
-        return StatusCode(500, new {status=500, title="Could not create client"});
+        return StatusCode(500, new
+        {
+            type="https://httpstatuses.com/500",
+            title="Could not create client",
+            status=500 
+        });
     }
 }

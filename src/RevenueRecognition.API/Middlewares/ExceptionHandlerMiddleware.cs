@@ -27,22 +27,24 @@ public class ExceptionHandlerMiddleware
         {
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = e.StatusCode;
-            await context.Response.WriteAsync(
-                JsonSerializer.Serialize(
-                    new { status = e.StatusCode, title = e.Message }
-                )
-            );
+            await context.Response.WriteAsync(JsonSerializer.Serialize(new
+            {
+                type = $"https://httpstatuses.com/{e.StatusCode}",
+                title = e.Message,
+                status = e.StatusCode
+            }));
         }
         catch (Exception e)
         {
             _logger.LogError(e, e.Message);
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = 500;
-            await context.Response.WriteAsync(
-                JsonSerializer.Serialize(
-                    new { status = 500, title = "Unexpected error occurred." }
-                )
-            );
+            await context.Response.WriteAsync(JsonSerializer.Serialize(new
+            {
+                type = "https://httpstatuses.com/500",
+                title = "Unexpected error occurred.",
+                status = 500
+            }));
         }
     }
 }
