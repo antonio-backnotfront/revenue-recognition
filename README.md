@@ -1,4 +1,28 @@
-# 💰 Revenue Recognition System
+<div align="center">
+  <a href="https://github.com/antonio-backnotfront/linear-regression/stargazers">
+    <img src="https://img.shields.io/github/stars/antonio-backnotfront/linear-regression?style=for-the-badge" alt="GitHub stars">
+  </a>
+  <a href="https://github.com/antonio-backnotfront/linear-regression/issues">
+    <img src="https://img.shields.io/github/issues/antonio-backnotfront/linear-regression.svg?style=for-the-badge" alt="GitHub issues">
+  </a>
+  <a href="https://github.com/antonio-backnotfront/linear-regression/blob/main/LICENSE.txt">
+    <img src="https://img.shields.io/github/license/antonio-backnotfront/linear-regression.svg?style=for-the-badge" alt="License">
+  </a>
+<br>
+<a href="https://linkedin.com/in/anton-solianyk-906453221">
+  <img src="https://img.shields.io/badge/🔗%20LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
+</a>
+
+  <a href="mailto:solyanicks@gmail.com">
+    <img src="https://img.shields.io/badge/Email-solyanicks%40gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Gmail">
+  </a>
+</div>
+
+
+
+
+<h1 align="center">💰 Revenue Recognition System</h1>
+
 
 This application tackles a classic challenge in finance: the **revenue recognition problem**.
 
@@ -12,14 +36,18 @@ Historically, flawed revenue recognition has fueled major corporate scandals, in
 
 ---
 
-## 📑 Table of Contents
+<h2 align="center"> 📑 Table of Contents </h2>
 
-- [Database Schema](#-database-schema)
-- [API Endpoints](#-api-endpoints)
-- [Request and Response Bodies](#-request-and-response-bodies)
-- [Usage](#-usage)
-- [Technologies](#-technologies)
-- [License](#-license)
+<p>
+    <a href="-database-schema">Database Schema</a> •
+    <a href="-api-endpoints">API Endpoints</a> •
+    <a href="-request-and-response-bodies">Request and Response Bodies</a> •
+    <a href="-usage">Usage</a> •
+    <a href="-technologies">Technologies</a> •
+    <a href="-license">Licence</a>
+
+</p>
+
 
 ---
 
