@@ -92,7 +92,7 @@ public class ClientService : IClientService
 
         if (companyInfo != null && individualInfo != null)
             throw new BadRequestException("Client can't be both Individual and Company.");
-    
+
         if (companyInfo == null && individualInfo == null)
             throw new BadRequestException("Client type must be provided.");
 
@@ -104,7 +104,7 @@ public class ClientService : IClientService
 
         return await CreateCompanyClientAsync(request, cancellationToken);
     }
-    
+
     private async Task<GetClientResponse> CreateIndividualClientAsync(
         CreateClientRequest request,
         CancellationToken cancellationToken)
@@ -152,7 +152,6 @@ public class ClientService : IClientService
             throw;
         }
     }
-
 
 
     public async Task<bool> RemoveClientAsync(
@@ -293,47 +292,28 @@ public class ClientService : IClientService
         }, cancellationToken);
     }
 
-    /// <summary>
-    /// If validation fails - throws an exception, which is caught in the ExceptionHandlerMiddleware
-    /// </summary>
-    /// <param name="email"></param>
-    /// <param name="cancellationToken"></param>
+
     private async Task ValidateUniquenessOfEmail(string email, CancellationToken cancellationToken)
     {
         if (await _repository.ExistsByEmailAsync(email, cancellationToken))
             throw new AlreadyExistsException($"Email '{email}' already exists.");
     }
 
-    /// <summary>
-    /// If validation fails - throws an exception, which is caught in the ExceptionHandlerMiddleware
-    /// </summary>
-    /// <param name="phone"></param>
-    /// <param name="cancellationToken"></param>
-    /// <exception cref="AlreadyExistsException"></exception>
+
     private async Task ValidateUniquenessOfPhone(string phone, CancellationToken cancellationToken)
     {
         if (await _repository.ExistsByPhoneNumberAsync(phone, cancellationToken))
             throw new AlreadyExistsException($"Phone number '{phone}' already exists.");
     }
 
-    /// <summary>
-    /// If validation fails - throws an exception, which is caught in the ExceptionHandlerMiddleware
-    /// </summary>
-    /// <param name="pesel"></param>
-    /// <param name="cancellationToken"></param>
-    /// <exception cref="AlreadyExistsException"></exception>
+
     private async Task ValidateUniquenessOfPesel(string pesel, CancellationToken cancellationToken)
     {
         if (await _repository.ExistsIndividualByPeselAsync(pesel, cancellationToken))
             throw new AlreadyExistsException($"PESEL '{pesel}' already exists.");
     }
 
-    /// <summary>
-    /// If validation fails - throws an exception, which is caught in the ExceptionHandlerMiddleware
-    /// </summary>
-    /// <param name="krs"></param>
-    /// <param name="cancellationToken"></param>
-    /// <exception cref="AlreadyExistsException"></exception>
+
     private async Task ValidateUniquenessOfKrs(string krs, CancellationToken cancellationToken)
     {
         if (await _repository.ExistsCompanyByKrsAsync(krs, cancellationToken))
@@ -341,13 +321,6 @@ public class ClientService : IClientService
     }
 
 
-    /// <summary>
-    /// Maps model Entity Client to DTO called GetClientResponse 
-    /// </summary>
-    /// <param name="client"></param>
-    /// <param name="company"></param>
-    /// <param name="individual"></param>
-    /// <returns></returns>
     private GetClientResponse MapToDto(Client client, CompanyClient? company, IndividualClient? individual)
     {
         return new GetClientResponse()
