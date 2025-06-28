@@ -244,7 +244,7 @@ public class ClientRepository : IClientRepository
             return client.IsDeleted;
         }
 
-        return false;
+        return true;
     }
 
     public async Task<bool> SoftDeleteByClientId(

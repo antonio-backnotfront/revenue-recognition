@@ -30,38 +30,33 @@ public class ClientService : IClientService
         List<GetClientResponse> dtos = new List<GetClientResponse>();
         foreach (Client client in clients)
         {
-            GetClientResponse dto = new GetClientResponse()
-            {
-                Id = client.Id,
-                Address = client.Address,
-                Email = client.Email,
-                PhoneNumber = client.PhoneNumber
-            };
             CompanyClient? companyInformation =
                 await _repository.GetCompanyClientByClientIdAsync(client.Id, cancellationToken);
-            if (companyInformation != null)
-            {
-                dto.CompanyInformation = new GetCompanyClientDto()
-                {
-                    Id = companyInformation.Id,
-                    Name = companyInformation.Name,
-                    KRS = companyInformation.KRS,
-                };
-            }
-
             IndividualClient? individualInformation =
                 await _repository.GetIndividualClientByClientIdAsync(client.Id, cancellationToken);
-            if (individualInformation != null)
-            {
-                if (individualInformation.IsDeleted) continue;
-                dto.IndividualInformation = new GetIndividualClientDto()
-                {
-                    Id = individualInformation.Id,
-                    FirstName = individualInformation.FirstName,
-                    LastName = individualInformation.LastName,
-                    PESEL = individualInformation.PESEL,
-                };
-            }
+            if (individualInformation != null && individualInformation.IsDeleted) continue;
+            GetClientResponse dto = MapToDto(client, companyInformation, individualInformation);
+            // if (companyInformation != null)
+            // {
+            //     dto.CompanyInformation = new GetCompanyClientDto()
+            //     {
+            //         Id = companyInformation.Id,
+            //         Name = companyInformation.Name,
+            //         KRS = companyInformation.KRS,
+            //     };
+            // }
+
+            // if (individualInformation != null)
+            // {
+            //     if (individualInformation.IsDeleted) continue;
+            //     dto.IndividualInformation = new GetIndividualClientDto()
+            //     {
+            //         Id = individualInformation.Id,
+            //         FirstName = individualInformation.FirstName,
+            //         LastName = individualInformation.LastName,
+            //         PESEL = individualInformation.PESEL,
+            //     };
+            // }
 
             dtos.Add(dto);
         }
@@ -69,7 +64,7 @@ public class ClientService : IClientService
         return dtos;
     }
 
-    public async Task<GetClientResponse?> GetClientByIdAsync(
+    public async Task<GetClientResponse> GetClientByIdAsync(
         int id,
         CancellationToken cancellationToken
     )
@@ -78,40 +73,37 @@ public class ClientService : IClientService
         if (client == null)
             throw new NotFoundException($"Client with id {id} not found");
 
-        GetClientResponse dto = new GetClientResponse()
-        {
-            Id = client.Id,
-            Address = client.Address,
-            Email = client.Email,
-            PhoneNumber = client.PhoneNumber
-        };
         CompanyClient? companyInformation =
             await _repository.GetCompanyClientByClientIdAsync(client.Id, cancellationToken);
-        if (companyInformation != null)
-        {
-            dto.CompanyInformation = new GetCompanyClientDto()
-            {
-                Id = companyInformation.Id,
-                Name = companyInformation.Name,
-                KRS = companyInformation.KRS,
-            };
-        }
-
         IndividualClient? individualInformation =
             await _repository.GetIndividualClientByClientIdAsync(client.Id, cancellationToken);
-        if (individualInformation != null)
-        {
-            if (await _repository.IsDeletedByClientId(id, cancellationToken))
-                throw new NotFoundException($"Client with id {id} not found");
+        if (individualInformation != null && individualInformation.IsDeleted)
+            throw new NotFoundException($"Client with id {id} not found");
+        
+        GetClientResponse dto = MapToDto(client, companyInformation, individualInformation);
+        // if (companyInformation != null)
+        // {
+        //     dto.CompanyInformation = new GetCompanyClientDto()
+        //     {
+        //         Id = companyInformation.Id,
+        //         Name = companyInformation.Name,
+        //         KRS = companyInformation.KRS,
+        //     };
+        // }
 
-            dto.IndividualInformation = new GetIndividualClientDto()
-            {
-                Id = individualInformation.Id,
-                FirstName = individualInformation.FirstName,
-                LastName = individualInformation.LastName,
-                PESEL = individualInformation.PESEL,
-            };
-        }
+        // if (individualInformation != null)
+        // {
+        //     if (await _repository.IsDeletedByClientId(id, cancellationToken))
+        //         throw new NotFoundException($"Client with id {id} not found");
+        //
+        //     dto.IndividualInformation = new GetIndividualClientDto()
+        //     {
+        //         Id = individualInformation.Id,
+        //         FirstName = individualInformation.FirstName,
+        //         LastName = individualInformation.LastName,
+        //         PESEL = individualInformation.PESEL,
+        //     };
+        // }
 
         return dto;
     }
@@ -130,20 +122,16 @@ public class ClientService : IClientService
         if (companyInformation == null && individualInformation == null)
             throw new BadRequestException("Client type must be provided.");
 
-        if (await _repository.ExistsByEmailAsync(request.Email, cancellationToken))
-            throw new AlreadyExistsException($"Email '{request.Email}' already exists.");
-
-        if (await _repository.ExistsByPhoneNumberAsync(request.PhoneNumber, cancellationToken))
-            throw new AlreadyExistsException($"Phone number '{request.PhoneNumber}' already exists.");
-
+        await ValidateUniquenessOfEmail(request.Email, cancellationToken);
+        await ValidateUniquenessOfPhone(request.PhoneNumber, cancellationToken);
+        
         int createdId = 0;
 
         // ---- for individual ----
         if (individualInformation != null)
         {
             string pesel = individualInformation.PESEL;
-            if (await _repository.ExistsIndividualByPeselAsync(pesel, cancellationToken))
-                throw new AlreadyExistsException($"PESEL '{pesel}' already exists.");
+            await ValidateUniquenessOfPesel(pesel, cancellationToken);
 
             await _unitOfWork.StartTransactionAsync(cancellationToken);
             try
@@ -153,8 +141,9 @@ public class ClientService : IClientService
                 IndividualClient? createdIndividual = await InsertIndividualClientAsync(request, createdId, cancellationToken);
                 createdClient.IndividualClient = createdIndividual;
                 await _unitOfWork.CommitTransactionAsync(cancellationToken);
+                return await GetClientByIdAsync(createdId, cancellationToken);
             }
-            catch (Exception e)
+            catch
             {
                 await _unitOfWork.RollbackTransactionAsync(cancellationToken);
                 throw;
@@ -165,8 +154,7 @@ public class ClientService : IClientService
         else if (companyInformation != null)
         {
             string krs = companyInformation.KRS;
-            if (await _repository.ExistsCompanyByKrsAsync(krs, cancellationToken))
-                throw new AlreadyExistsException($"KRS '{krs}' already exists.");
+            await ValidateUniquenessOfKrs(krs, cancellationToken);
 
             await _unitOfWork.StartTransactionAsync(cancellationToken);
             try
@@ -176,15 +164,16 @@ public class ClientService : IClientService
                 CompanyClient? createdCompany = await InsertCompanyClientAsync(request, createdId, cancellationToken);
                 createdClient.CompanyClient = createdCompany;
                 await _unitOfWork.CommitTransactionAsync(cancellationToken);
+                return await GetClientByIdAsync(createdId, cancellationToken);
             }
-            catch (Exception e)
+            catch
             {
                 await _unitOfWork.RollbackTransactionAsync(cancellationToken);
                 throw;
             }
         }
         
-        return await GetClientByIdAsync(createdId, cancellationToken);
+        throw new Exception("Client could not be created.");
     }
 
     public async Task<bool> RemoveClientAsync(
@@ -216,6 +205,9 @@ public class ClientService : IClientService
         Client? client = await _repository.GetClientByIdAsync(id, cancellationToken);
         if (client == null)
             throw new NotFoundException($"Client with id {id} not found.");
+        
+        if (dto.Email != null) await ValidateUniquenessOfEmail(dto.Email, cancellationToken);
+        if (dto.PhoneNumber != null && dto.PhoneNumber != client.PhoneNumber) await ValidateUniquenessOfPhone(dto.PhoneNumber, cancellationToken);
 
         await _unitOfWork.StartTransactionAsync(cancellationToken);
         try
@@ -226,7 +218,7 @@ public class ClientService : IClientService
                 {
                     Address = dto.Address == null ? client.Address : dto.Address,
                     Email = dto.Email == null ? client.Email : dto.Email,
-                    PhoneNumber = dto.PhoneNumber == null ? client.PhoneNumber : dto.PhoneNumber
+                    PhoneNumber = dto.PhoneNumber == null ? client.PhoneNumber : dto.PhoneNumber,
                 },
                 cancellationToken);
 
@@ -236,27 +228,27 @@ public class ClientService : IClientService
             // ---- if individual ----
             if (individualClient != null)
             {
-                if (await _repository.IsDeletedByClientId(id, cancellationToken))
+                if (individualClient.IsDeleted)
                     throw new NotFoundException($"Client with id {id} not found.");
 
-                if (!(dto.PESEL == null))
+                if (dto.PESEL != individualClient.PESEL)
                     throw new ForbidException($"PESEL can't be changed.");
-
+                
 
                 await _repository.UpdateIndividualClientAsync(
                     id,
                     new IndividualClient()
                     {
-                        PESEL = dto.PESEL == null ? individualClient.PESEL : dto.PESEL,
                         FirstName = dto.FirstName == null ? individualClient.FirstName : dto.FirstName,
-                        LastName = dto.LastName == null ? individualClient.LastName : dto.LastName
+                        LastName = dto.LastName == null ? individualClient.LastName : dto.LastName,
+                        PESEL = individualClient.PESEL,
                     },
                     cancellationToken);
             }
             // ---- if company ----
             else if (companyClient != null)
             {
-                if (!(dto.KRS == null))
+                if (dto.KRS != null && dto.KRS != companyClient.KRS)
                     throw new ForbidException($"KRS can't be changed.");
 
 
@@ -265,7 +257,7 @@ public class ClientService : IClientService
                     new CompanyClient()
                     {
                         Name = dto.Name == null ? companyClient.Name : dto.Name,
-                        KRS = dto.KRS == null ? companyClient.KRS : dto.KRS,
+                        KRS = companyClient.KRS,
                     },
                     cancellationToken);
             }
@@ -273,7 +265,7 @@ public class ClientService : IClientService
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
             return await GetClientByIdAsync(client.Id, cancellationToken);
         }
-        catch (Exception e)
+        catch
         {
             await _unitOfWork.RollbackTransactionAsync(cancellationToken);
             throw;
@@ -320,4 +312,87 @@ public class ClientService : IClientService
             ClientId = clientId
         }, cancellationToken);
     }
+
+    /// <summary>
+    /// If validation fails - throws an exception, which is caught in the ExceptionHandlerMiddleware
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="cancellationToken"></param>
+    private async Task ValidateUniquenessOfEmail(string email, CancellationToken cancellationToken)
+    {
+        if (await _repository.ExistsByEmailAsync(email, cancellationToken))
+            throw new AlreadyExistsException($"Email '{email}' already exists.");
+    }
+    
+    /// <summary>
+    /// If validation fails - throws an exception, which is caught in the ExceptionHandlerMiddleware
+    /// </summary>
+    /// <param name="phone"></param>
+    /// <param name="cancellationToken"></param>
+    /// <exception cref="AlreadyExistsException"></exception>
+    private async Task ValidateUniquenessOfPhone(string phone, CancellationToken cancellationToken)
+    {
+        if (await _repository.ExistsByPhoneNumberAsync(phone, cancellationToken))
+            throw new AlreadyExistsException($"Phone number '{phone}' already exists.");
+    }
+    
+    /// <summary>
+    /// If validation fails - throws an exception, which is caught in the ExceptionHandlerMiddleware
+    /// </summary>
+    /// <param name="pesel"></param>
+    /// <param name="cancellationToken"></param>
+    /// <exception cref="AlreadyExistsException"></exception>
+    private async Task ValidateUniquenessOfPesel(string pesel, CancellationToken cancellationToken)
+    {
+        if (await _repository.ExistsIndividualByPeselAsync(pesel, cancellationToken))
+            throw new AlreadyExistsException($"PESEL '{pesel}' already exists.");
+    }
+    
+    /// <summary>
+    /// If validation fails - throws an exception, which is caught in the ExceptionHandlerMiddleware
+    /// </summary>
+    /// <param name="krs"></param>
+    /// <param name="cancellationToken"></param>
+    /// <exception cref="AlreadyExistsException"></exception>
+    private async Task ValidateUniquenessOfKrs(string krs, CancellationToken cancellationToken)
+    {
+        if (await _repository.ExistsCompanyByKrsAsync(krs, cancellationToken))
+            throw new AlreadyExistsException($"KRS '{krs}' already exists.");
+    }
+    
+
+   /// <summary>
+   /// Maps model Entity Client to DTO called GetClientResponse 
+   /// </summary>
+   /// <param name="client"></param>
+   /// <param name="company"></param>
+   /// <param name="individual"></param>
+   /// <param name="cancellationToken"></param>
+   /// <returns></returns>
+    private GetClientResponse MapToDto(Client client, CompanyClient? company, IndividualClient? individual)
+    {
+        return new GetClientResponse()
+        {
+            Id = client.Id,
+            Address = client.Address,
+            Email = client.Email,
+            PhoneNumber = client.PhoneNumber,
+            CompanyInformation = company == null ? null :
+                new GetCompanyClientDto()
+                {
+                    Id = company.Id,
+                    Name = company.Name,
+                    KRS = company.KRS,
+                },
+            IndividualInformation = individual == null ? null :
+                new GetIndividualClientDto()
+                {
+                    Id = individual.Id,
+                    FirstName = individual.FirstName,
+                    LastName = individual.LastName,
+                    PESEL = individual.PESEL,
+                }
+        };
+    }
+
 }

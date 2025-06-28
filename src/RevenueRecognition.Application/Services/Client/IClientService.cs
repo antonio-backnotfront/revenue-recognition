@@ -24,7 +24,7 @@ public interface IClientService
         CancellationToken cancellationToken
     );
 
-    public Task<GetClientResponse?> GetClientByIdAsync(
+    public Task<GetClientResponse> GetClientByIdAsync(
         int id,
         CancellationToken cancellationToken
     );
