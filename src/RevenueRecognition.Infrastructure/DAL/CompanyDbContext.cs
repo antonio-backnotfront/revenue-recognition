@@ -135,12 +135,17 @@ public class CompanyDbContext : DbContext
         modelBuilder.Entity<Discount>().HasData(
             new Discount
             {
-                Id = 1, Name = "New Year Sale", StartDate = new DateTime(2024, 1, 1),
+                Id = 1, Name = "Loyal Customer Discount", StartDate = new DateTime(2000, 1, 1),
+                EndDate = new DateTime(2029, 12, 31), Value = 5m
+            },
+            new Discount
+            {
+                Id = 2, Name = "New Year Sale", StartDate = new DateTime(2024, 1, 1),
                 EndDate = new DateTime(2024, 1, 31), Value = 10m
             },
             new Discount
             {
-                Id = 2, Name = "Black Friday", StartDate = new DateTime(2024, 11, 25),
+                Id = 3, Name = "Black Friday", StartDate = new DateTime(2024, 11, 25),
                 EndDate = new DateTime(2024, 11, 30), Value = 20m
             }
         );
