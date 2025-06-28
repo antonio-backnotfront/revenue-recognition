@@ -66,6 +66,13 @@ public class ContractRepository : IContractRepository
         return await _context.Contracts.ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Contract>> GetAllContractsBySoftwareIdAsync(int softwareId, CancellationToken cancellationToken)
+    {
+        return await _context.Contracts
+            .Where(c => c.SoftwareVersion.SoftwareId == softwareId)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<List<Contract>> GetAllContractsByClientIdAsync(
         int id,
         CancellationToken cancellationToken
