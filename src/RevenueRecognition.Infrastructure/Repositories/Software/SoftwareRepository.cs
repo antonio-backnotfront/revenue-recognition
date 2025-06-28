@@ -23,4 +23,10 @@ public class SoftwareRepository : ISoftwareRepository
             .Include(v => v.Software)
             .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
+
+    public async Task<Software?> GetSoftwareByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        return await _context.Softwares
+            .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
+    }
 }

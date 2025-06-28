@@ -17,12 +17,14 @@ public class SubscriptionRepository : ISubscriptionRepository
     public async Task<List<Subscription>> GetAllSubscriptionsAsync(CancellationToken cancellationToken)
     {
         return await _context.Subscriptions
+            .Include(s => s.Software)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<Subscription?> GetSubscriptionByIdAsync(int id, CancellationToken cancellationToken)
     {
         return await _context.Subscriptions
+            .Include(s => s.Software)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
@@ -66,6 +68,20 @@ public class SubscriptionRepository : ISubscriptionRepository
             _context.DiscountSubscriptions.AddAsync(discountSubscription, cancellationToken)).Entity;
         await _context.SaveChangesAsync(cancellationToken);
         return created;
+    }
+
+    public async Task<RenewalPeriod?> GetRenewalPeriodByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        return await _context.RenewalPeriods
+            .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
+    }
+
+    public async Task<int?> GetSubscriptionStatusIdByNameAsync(string name, CancellationToken cancellationToken)
+    { 
+        return await _context.SubscriptionStatuses
+            .Where(c => string.Equals(c.Name.ToLower(), name.ToLower()))
+            .Select(c => c.Id)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<List<SubscriptionPayment>> GetAllPaymentsAsync(

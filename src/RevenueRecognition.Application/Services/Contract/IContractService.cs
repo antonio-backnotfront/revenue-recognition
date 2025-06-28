@@ -5,16 +5,16 @@ namespace RevenueRecognition.Application.Services.Contract;
 
 public interface IContractService
 {
-    public Task<CreateContractResponse> CreateContractAsync(CreateContractRequest requestDto,
+    public Task<CreateContractResponse> CreateContractOrThrowAsync(CreateContractRequest requestDto,
         CancellationToken cancellationToken);
 
-    public Task<CreatePaymentResponse> IssuePaymentAsync(
+    public Task<CreateContractPaymentResponse> IssuePaymentByIdOrThrowAsync(
         int id,
         CreatePaymentRequest request,
         CancellationToken cancellationToken
     );
 
-    public Task DeleteContractByIdAsync(
+    public Task DeleteContractByIdOrThrowAsync(
         int contractId,
         CancellationToken cancellationToken
     );

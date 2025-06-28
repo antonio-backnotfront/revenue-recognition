@@ -42,15 +42,15 @@ public class ContractService : IContractService
         _clientService = clientService;
     }
 
-    public async Task<CreateContractResponse> CreateContractAsync(CreateContractRequest requestDto,
+    public async Task<CreateContractResponse> CreateContractOrThrowAsync(CreateContractRequest requestDto,
         CancellationToken cancellationToken)
     {
-        var client = await _clientService.GetClientByIdAsync(requestDto.ClientId, cancellationToken);
+        var client = await _clientService.GetClientByIdOrThrowAsync(requestDto.ClientId, cancellationToken);
         var softwareVersion =
-            await _softwareService.GetSoftwareVersionBySoftwareVersionIdAsync(requestDto.SoftwareVersionId,
+            await _softwareService.GetSoftwareVersionBySoftwareVersionIdOrThrowAsync(requestDto.SoftwareVersionId,
                 cancellationToken);
 
-        await ValidateNoActiveContractOrSubscription(client.Id, requestDto.SoftwareVersionId, cancellationToken);
+        await ValidateNoActiveContractOrSubscription(client.Id, softwareVersion.SoftwareId, cancellationToken);
         ValidateContractDates(requestDto.StartDate, requestDto.EndDate);
         ValidateSupportYears(requestDto.YearsOfSupport);
 
@@ -98,7 +98,7 @@ public class ContractService : IContractService
     }
 
 
-    public async Task<CreatePaymentResponse> IssuePaymentAsync(
+    public async Task<CreateContractPaymentResponse> IssuePaymentByIdOrThrowAsync(
         int contractId,
         CreatePaymentRequest request,
         CancellationToken cancellationToken
@@ -122,7 +122,7 @@ public class ContractService : IContractService
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
 
-            return new CreatePaymentResponse
+            return new CreateContractPaymentResponse
             {
                 Id = payment.Id,
                 ContractId = contract.Id,
@@ -138,25 +138,38 @@ public class ContractService : IContractService
     }
 
 
-    public async Task DeleteContractByIdAsync(int contractId, CancellationToken cancellationToken)
+    public async Task DeleteContractByIdOrThrowAsync(int contractId, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        await _unitOfWork.StartTransactionAsync(cancellationToken);
+        try
+        {
+            await _repository.DeleteContractByIdAsync(contractId, cancellationToken);
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+        }
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+        }
     }
 
     private async Task ValidateNoActiveContractOrSubscription(int clientId, int softwareVersionId, CancellationToken ct)
     {
-        var contracts = await _repository.GetContractsByClientIdAndSoftwareIdAsync(clientId, softwareVersionId, ct);
-        if (contracts.Any(IsActiveOrRecentPaid))
+        var contracts =
+            await _repository.GetContractsByClientIdAndSoftwareVersionIdAsync(clientId, softwareVersionId, ct);
+        if (contracts.Any(IsContractActiveOrRecentPaid))
             throw new AlreadyExistsException("Client already has an active contract for this software.");
 
         var subscriptions = await _subscriptionService.GetSubscriptionsByClientIdAsync(clientId, ct);
+        Console.WriteLine($"{string.Join(",", subscriptions)}");
         if (subscriptions.Any(s =>
                 s.SubscriptionStatus.Name.Equals(Enums.SubscriptionStatus.Active.ToString(),
-                    StringComparison.OrdinalIgnoreCase)))
+                    StringComparison.OrdinalIgnoreCase)
+                &&
+                s.SoftwareId == softwareVersionId))
             throw new AlreadyExistsException("Client already has an active subscription for this software.");
     }
 
-    private bool IsActiveOrRecentPaid(Contract contract)
+    private bool IsContractActiveOrRecentPaid(Contract contract)
     {
         return contract.ContractStatus.Name.Equals(Enums.ContractStatus.Active.ToString(),
                    StringComparison.OrdinalIgnoreCase) ||
@@ -248,9 +261,9 @@ public class ContractService : IContractService
 
         await _repository.SetContractStatusAsync(contract, paidStatusId.Value, ct);
 
-        if (!await _clientService.IsClientLoyalById(contract.ClientId, ct))
+        if (!await _clientService.IsClientLoyalByIdOrThrowAsync(contract.ClientId, ct))
         {
-            await _clientService.SetIsClientLoyalById(contract.ClientId, true, ct);
+            await _clientService.SetIsClientLoyalByIdOrThrowAsync(contract.ClientId, true, ct);
         }
     }
 }

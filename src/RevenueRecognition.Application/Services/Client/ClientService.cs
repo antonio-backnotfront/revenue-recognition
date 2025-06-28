@@ -45,7 +45,7 @@ public class ClientService : IClientService
         return dtos;
     }
 
-    public async Task<GetClientResponse> GetClientByIdAsync(
+    public async Task<GetClientResponse> GetClientByIdOrThrowAsync(
         int id,
         CancellationToken cancellationToken
     )
@@ -66,15 +66,14 @@ public class ClientService : IClientService
         return dto;
     }
 
-    public async Task<bool> IsClientLoyalById(int id, CancellationToken cancellationToken)
+    public async Task<bool> IsClientLoyalByIdOrThrowAsync(int id, CancellationToken cancellationToken)
     {
-        Client? client = await _repository.GetClientByIdAsync(id, cancellationToken);
-        if (client == null)
-            throw new NotFoundException($"Client with id {id} not found.");
+        GetClientResponse client = await GetClientByIdOrThrowAsync(id, cancellationToken);
         return client.IsLoyal;
     }
 
-    public async Task<bool> SetIsClientLoyalById(int clientId, bool isLoyal, CancellationToken cancellationToken)
+    public async Task<bool> SetIsClientLoyalByIdOrThrowAsync(int clientId, bool isLoyal,
+        CancellationToken cancellationToken)
     {
         Client? client = await _repository.GetClientByIdAsync(clientId, cancellationToken);
         if (client == null)
@@ -83,7 +82,7 @@ public class ClientService : IClientService
     }
 
 
-    public async Task<GetClientResponse> CreateClientAsync(
+    public async Task<GetClientResponse> CreateClientOrThrowAsync(
         CreateClientRequest request,
         CancellationToken cancellationToken)
     {
@@ -120,7 +119,7 @@ public class ClientService : IClientService
             baseClient.IndividualClient = individualClient;
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
-            return await GetClientByIdAsync(baseClient.Id, cancellationToken);
+            return await GetClientByIdOrThrowAsync(baseClient.Id, cancellationToken);
         }
         catch
         {
@@ -144,7 +143,7 @@ public class ClientService : IClientService
             baseClient.CompanyClient = companyClient;
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
-            return await GetClientByIdAsync(baseClient.Id, cancellationToken);
+            return await GetClientByIdOrThrowAsync(baseClient.Id, cancellationToken);
         }
         catch
         {
@@ -154,7 +153,7 @@ public class ClientService : IClientService
     }
 
 
-    public async Task<bool> RemoveClientAsync(
+    public async Task<bool> RemoveClientByIdOrThrowAsync(
         int id,
         CancellationToken cancellationToken
     )
@@ -174,7 +173,7 @@ public class ClientService : IClientService
         return true;
     }
 
-    public async Task<GetClientResponse> UpdateClientAsync(
+    public async Task<GetClientResponse> UpdateClientByIdOrThrowAsync(
         int id,
         UpdateClientDto dto,
         CancellationToken cancellationToken
@@ -242,7 +241,7 @@ public class ClientService : IClientService
             }
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
-            return await GetClientByIdAsync(client.Id, cancellationToken);
+            return await GetClientByIdOrThrowAsync(client.Id, cancellationToken);
         }
         catch
         {

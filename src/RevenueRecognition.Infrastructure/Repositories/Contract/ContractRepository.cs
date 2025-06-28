@@ -29,6 +29,7 @@ public class ContractRepository : IContractRepository
     {
         Contract? created = (await _context.Contracts.AddAsync(contract, cancellationToken)).Entity;
         await _context.SaveChangesAsync(cancellationToken);
+        
         return created;
     }
 
@@ -89,7 +90,7 @@ public class ContractRepository : IContractRepository
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<List<Contract>> GetContractsByClientIdAndSoftwareIdAsync(int clientId,
+    public async Task<List<Contract>> GetContractsByClientIdAndSoftwareVersionIdAsync(int clientId,
         int softwareId,
         CancellationToken cancellationToken)
     {
@@ -99,5 +100,17 @@ public class ContractRepository : IContractRepository
                 p.ClientId == clientId &&
                 p.SoftwareVersion.SoftwareId == softwareId
             ).ToListAsync(cancellationToken);
+    }
+
+    public async Task DeleteContractByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        Contract contract = await _context.Contracts
+            .Include(c => c.ContractPayments)
+            .Include(c => c.DiscountContracts)
+            .FirstAsync(c => c.Id == id, cancellationToken);
+        _context.ContractPayments.RemoveRange(contract.ContractPayments);
+        _context.DiscountContracts.RemoveRange(contract.DiscountContracts);
+        _context.Contracts.Remove(contract);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

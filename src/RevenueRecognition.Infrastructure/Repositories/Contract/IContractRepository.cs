@@ -18,7 +18,9 @@ public interface IContractRepository
     public Task<List<Contract>> GetAllContractsByClientIdAsync(int id, CancellationToken cancellationToken);
     public Task<int?> GetContractStatusIdByNameAsync(string name, CancellationToken cancellationToken);
 
-    public Task<List<Contract>> GetContractsByClientIdAndSoftwareIdAsync(int clientId,
+    public Task<List<Contract>> GetContractsByClientIdAndSoftwareVersionIdAsync(int clientId,
         int softwareId,
         CancellationToken cancellationToken);
+    
+    public Task DeleteContractByIdAsync(int id, CancellationToken cancellationToken);
 }

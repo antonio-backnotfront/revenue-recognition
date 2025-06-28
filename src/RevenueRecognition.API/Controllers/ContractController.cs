@@ -29,7 +29,7 @@ public class ContractController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        CreateContractResponse createdContract = await _service.CreateContractAsync(request, cancellationToken);
+        CreateContractResponse createdContract = await _service.CreateContractOrThrowAsync(request, cancellationToken);
         return StatusCode(201, createdContract);
     }
     
@@ -40,7 +40,17 @@ public class ContractController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        CreatePaymentResponse createdPayment = await _service.IssuePaymentAsync(contractId, request, cancellationToken);
-        return StatusCode(201, createdPayment);
+        CreateContractPaymentResponse createdContractPayment = await _service.IssuePaymentByIdOrThrowAsync(contractId, request, cancellationToken);
+        return StatusCode(201, createdContractPayment);
+    }
+    
+    [HttpDelete("{contractId}")]
+    public async Task<IActionResult> DeleteContractAsync(
+        int contractId,
+        CancellationToken cancellationToken
+    )
+    {
+        await _service.DeleteContractByIdOrThrowAsync(contractId, cancellationToken);
+        return StatusCode(204);
     }
 }

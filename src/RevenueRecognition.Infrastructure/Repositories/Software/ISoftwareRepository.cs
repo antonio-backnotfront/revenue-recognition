@@ -8,4 +8,9 @@ public interface ISoftwareRepository
         int id,
         CancellationToken cancellationToken
     );
+
+    public Task<Software?> GetSoftwareByIdAsync(
+        int id,
+        CancellationToken cancellationToken
+    );
 }

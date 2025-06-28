@@ -1,8 +1,8 @@
-using RevenueRecognition.Application.Exceptions;
+namespace RevenueRecognition.Application.Services.Software;
+
+using Exceptions;
 using RevenueRecognition.Infrastructure.Repositories.Software;
 using RevenueRecognition.Models.Software;
-
-namespace RevenueRecognition.Application.Services.Software;
 
 public class SoftwareService : ISoftwareService
 {
@@ -13,7 +13,7 @@ public class SoftwareService : ISoftwareService
         _repository = repository;
     }
 
-    public async Task<SoftwareVersion> GetSoftwareVersionBySoftwareVersionIdAsync(
+    public async Task<SoftwareVersion> GetSoftwareVersionBySoftwareVersionIdOrThrowAsync(
         int id,
         CancellationToken cancellationToken
     )
@@ -23,5 +23,13 @@ public class SoftwareService : ISoftwareService
         if (softwareVersion == null)
             throw new NotFoundException($"SoftwareVersion with id {id} not found.");
         return softwareVersion;
+    }
+
+    public async Task<Software> GetSoftwareByIdOrThrowAsync(int id, CancellationToken cancellationToken)
+    {
+        Software? software = await _repository.GetSoftwareByIdAsync(id, cancellationToken);
+        if (software == null)
+            throw new NotFoundException($"Software with id {id} not found.");
+        return software;
     }
 }

@@ -6,13 +6,14 @@ using Models.Subscription;
 
 public interface ISubscriptionService
 {
-    public Task<CreateSubscriptionRequest> CreateSubscriptionAsync(
+    public Task<CreateSubscriptionResponse> CreateSubscriptionOrThrowAsync(
         CreateSubscriptionRequest request,
         CancellationToken cancellationToken
     );
 
-    public Task<CreatePaymentRequest> IssuePaymentAsync(
-        CreateSubscriptionRequest request,
+    public Task<CreateSubscriptionPaymentResponse> IssuePaymentByIdOrThrowAsync(
+        int id,
+        CreatePaymentRequest request,
         CancellationToken cancellationToken
     );
 

@@ -28,15 +28,15 @@ public class ClientController : ControllerBase
         return Ok(await _service.GetClientsAsync(cancellationToken));
     }
 
-    [HttpGet("{id}"), ActionName("GetClientByIdAsync")]
+    [HttpGet("{id}"), ActionName("GetClientByIdOrThrowAsync")]
     public async Task<IActionResult> GetClientByIdAsync(
         int id,
         CancellationToken cancellationToken
     )
     {
-        GetClientResponse? response = await _service.GetClientByIdAsync(id, cancellationToken);
+        GetClientResponse? response = await _service.GetClientByIdOrThrowAsync(id, cancellationToken);
         return response != null
-            ? StatusCode(200, await _service.GetClientByIdAsync(id, cancellationToken))
+            ? StatusCode(200, await _service.GetClientByIdOrThrowAsync(id, cancellationToken))
             : StatusCode(404, new
             {
                 type = $"https://httpstatuses.com/404",
@@ -51,7 +51,7 @@ public class ClientController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        GetClientResponse createdClient = await _service.CreateClientAsync(request, cancellationToken);
+        GetClientResponse createdClient = await _service.CreateClientOrThrowAsync(request, cancellationToken);
         return CreatedAtAction(nameof(GetClientByIdAsync), new { Id = createdClient.Id }, createdClient);
     }
 
@@ -62,7 +62,7 @@ public class ClientController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        GetClientResponse updatedClient = await _service.UpdateClientAsync(id, dto, cancellationToken);
+        GetClientResponse updatedClient = await _service.UpdateClientByIdOrThrowAsync(id, dto, cancellationToken);
         return Ok(updatedClient);
     }
 
@@ -72,7 +72,7 @@ public class ClientController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        await _service.RemoveClientAsync(id, cancellationToken);
+        await _service.RemoveClientByIdOrThrowAsync(id, cancellationToken);
         return NoContent();
     }
 }

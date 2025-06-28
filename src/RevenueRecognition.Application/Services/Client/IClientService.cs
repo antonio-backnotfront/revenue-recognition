@@ -9,33 +9,33 @@ public interface IClientService
         CancellationToken cancellationToken
     );
 
-    public Task<GetClientResponse> CreateClientAsync(
+    public Task<GetClientResponse> CreateClientOrThrowAsync(
         CreateClientRequest request,
         CancellationToken cancellationToken
     );
 
-    public Task<bool> RemoveClientAsync(
+    public Task<bool> RemoveClientByIdOrThrowAsync(
         int id,
         CancellationToken cancellationToken
     );
 
-    public Task<GetClientResponse> UpdateClientAsync(
+    public Task<GetClientResponse> UpdateClientByIdOrThrowAsync(
         int id,
         UpdateClientDto dto,
         CancellationToken cancellationToken
     );
 
-    public Task<GetClientResponse> GetClientByIdAsync(
+    public Task<GetClientResponse> GetClientByIdOrThrowAsync(
         int id,
         CancellationToken cancellationToken
     );
 
-    public Task<bool> IsClientLoyalById(
+    public Task<bool> IsClientLoyalByIdOrThrowAsync(
         int id,
         CancellationToken cancellationToken
     );
     
-    public Task<bool> SetIsClientLoyalById(
+    public Task<bool> SetIsClientLoyalByIdOrThrowAsync(
         int clientId,
         bool isLoyal,
         CancellationToken cancellationToken
