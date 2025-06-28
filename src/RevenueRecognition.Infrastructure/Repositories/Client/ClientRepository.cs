@@ -197,38 +197,13 @@ public class ClientRepository : IClientRepository
         return false;
     }
 
-    public async Task<bool> IsLoyalByIdAsync(
-        int id,
-        CancellationToken cancellationToken
-    )
-    {
-        Client? client =
-            await _context.Clients
-                .FirstOrDefaultAsync(client => client.Id == id, cancellationToken);
-        if (client != null)
-        {
-            return client.IsLoyal;
-        }
-
-        return false;
-    }
-
-    public async Task<bool> SetIsLoyalByIdAsync(
-        int id,
+    public async Task<bool> SetIsLoyalAsync(Client client,
         bool isLoyal,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
-        Client? client =
-            await _context.Clients.FirstOrDefaultAsync(client => client.Id == id, cancellationToken);
-        if (client != null)
-        {
-            client.IsLoyal = isLoyal;
-            await _context.SaveChangesAsync(cancellationToken);
-            return true;
-        }
-
-        return false;
+        client.IsLoyal = isLoyal;
+        await _context.SaveChangesAsync(cancellationToken);
+        return true;
     }
 
     public async Task<bool> IsDeletedByClientId(
@@ -261,6 +236,7 @@ public class ClientRepository : IClientRepository
             await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
+
         return false;
     }
 }

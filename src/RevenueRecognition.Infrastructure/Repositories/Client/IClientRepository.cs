@@ -80,15 +80,9 @@ public interface IClientRepository
         CancellationToken cancellationToken
     );
 
-    public Task<bool> IsLoyalByIdAsync(
-        int id,
-        CancellationToken cancellationToken
-    );
-    public Task<bool> SetIsLoyalByIdAsync(
-        int id,
+    public Task<bool> SetIsLoyalAsync(Client client,
         bool isLoyal,
-        CancellationToken cancellationToken
-    );
+        CancellationToken cancellationToken);
     public Task<bool> IsDeletedByClientId(
         int id,
         CancellationToken cancellationToken

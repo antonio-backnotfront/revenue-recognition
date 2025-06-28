@@ -32,6 +32,7 @@ public class SubscriptionRepository : ISubscriptionRepository
     )
     {
         return await _context.Subscriptions
+            .Include(x => x.SubscriptionStatus)
             .Where(x => x.ClientId == id)
             .ToListAsync(cancellationToken);
     }
@@ -41,7 +42,10 @@ public class SubscriptionRepository : ISubscriptionRepository
         CancellationToken cancellationToken
     )
     {
-        throw new NotImplementedException();
+        Subscription created =
+            (await _context.Subscriptions.AddAsync(subscription, cancellationToken)).Entity;
+        await _context.SaveChangesAsync(cancellationToken);
+        return created;
     }
 
     public async Task<SubscriptionPayment?> InsertPaymentAsync(
@@ -49,7 +53,19 @@ public class SubscriptionRepository : ISubscriptionRepository
         CancellationToken cancellationToken
     )
     {
-        return (await _context.SubscriptionPayments.AddAsync(subscriptionPayment, cancellationToken)).Entity;
+        SubscriptionPayment created =
+            (await _context.SubscriptionPayments.AddAsync(subscriptionPayment, cancellationToken)).Entity;
+        await _context.SaveChangesAsync(cancellationToken);
+        return created;
+    }
+
+    public async Task<DiscountSubscription?> InsertSubscriptionDiscountAsync(DiscountSubscription discountSubscription,
+        CancellationToken cancellationToken)
+    {
+        DiscountSubscription? created = (await
+            _context.DiscountSubscriptions.AddAsync(discountSubscription, cancellationToken)).Entity;
+        await _context.SaveChangesAsync(cancellationToken);
+        return created;
     }
 
     public async Task<List<SubscriptionPayment>> GetAllPaymentsAsync(
@@ -58,7 +74,7 @@ public class SubscriptionRepository : ISubscriptionRepository
     {
         return await _context.SubscriptionPayments.ToListAsync(cancellationToken);
     }
-    
+
     public async Task<List<SubscriptionPayment>> GetAllPaymentsBySoftwareIdAsync(
         int id,
         CancellationToken cancellationToken

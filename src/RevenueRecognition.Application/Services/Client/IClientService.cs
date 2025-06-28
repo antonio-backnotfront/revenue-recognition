@@ -1,6 +1,7 @@
-using RevenueRecognition.Application.DTOs.Client;
-
 namespace RevenueRecognition.Application.Services.Client;
+
+using RevenueRecognition.Application.DTOs.Client;
+using Models.Client;
 
 public interface IClientService
 {
@@ -26,6 +27,17 @@ public interface IClientService
 
     public Task<GetClientResponse> GetClientByIdAsync(
         int id,
+        CancellationToken cancellationToken
+    );
+
+    public Task<bool> IsClientLoyalById(
+        int id,
+        CancellationToken cancellationToken
+    );
+    
+    public Task<bool> SetIsClientLoyalById(
+        int clientId,
+        bool isLoyal,
         CancellationToken cancellationToken
     );
 }

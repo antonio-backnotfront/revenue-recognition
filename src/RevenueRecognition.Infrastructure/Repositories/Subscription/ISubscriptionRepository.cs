@@ -14,6 +14,11 @@ public interface ISubscriptionRepository
         SubscriptionPayment subscriptionPayment,
         CancellationToken cancellationToken
     );
+    
+    public Task<DiscountSubscription?> InsertSubscriptionDiscountAsync(
+        DiscountSubscription discountSubscription,
+        CancellationToken cancellationToken
+    );
 
     public Task<List<SubscriptionPayment>> GetAllPaymentsAsync(CancellationToken cancellationToken);
 

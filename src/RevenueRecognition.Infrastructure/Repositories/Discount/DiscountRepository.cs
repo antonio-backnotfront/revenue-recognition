@@ -21,4 +21,14 @@ public class DiscountRepository : IDiscountRepository
             .OrderByDescending(c => c.Value)
             .FirstOrDefaultAsync(cancellationToken);
     }
+    
+    public async Task<Discount?> GetLoyalClientDiscountAsync(CancellationToken cancellationToken)
+    {
+        return await _context.Discounts
+            .Where(c => c.StartDate == null && c.EndDate == null)
+            .OrderByDescending(c => c.Value)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+    
+    
 }

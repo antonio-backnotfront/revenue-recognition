@@ -1,22 +1,25 @@
-using RevenueRecognition.Application.Exceptions;
-using RevenueRecognition.Infrastructure.Repositories.UnitOfWork;
-
 namespace RevenueRecognition.Application.Services.Client;
 
-using RevenueRecognition.Application.DTOs.Client;
-using RevenueRecognition.Infrastructure.Repositories.Client;
+using Exceptions;
+using Infrastructure.Repositories.Discount;
+using Infrastructure.Repositories.UnitOfWork;
+using Application.DTOs.Client;
+using Infrastructure.Repositories.Client;
 using Models.Client;
 
 public class ClientService : IClientService
 {
     private readonly IClientRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IDiscountRepository _discountRepository;
 
     public ClientService(
         IClientRepository repository,
-        IUnitOfWork unitOfWork
+        IUnitOfWork unitOfWork,
+        IDiscountRepository discountRepository
     )
     {
+        _discountRepository = discountRepository;
         _unitOfWork = unitOfWork;
         _repository = repository;
     }
@@ -63,74 +66,94 @@ public class ClientService : IClientService
         return dto;
     }
 
+    public async Task<bool> IsClientLoyalById(int id, CancellationToken cancellationToken)
+    {
+        Client? client = await _repository.GetClientByIdAsync(id, cancellationToken);
+        if (client == null)
+            throw new NotFoundException($"Client with id {id} not found.");
+        return client.IsLoyal;
+    }
+
+    public async Task<bool> SetIsClientLoyalById(int clientId, bool isLoyal, CancellationToken cancellationToken)
+    {
+        Client? client = await _repository.GetClientByIdAsync(clientId, cancellationToken);
+        if (client == null)
+            throw new NotFoundException($"Client with id {clientId} not found.");
+        return await _repository.SetIsLoyalAsync(client, isLoyal, cancellationToken);
+    }
+
+
     public async Task<GetClientResponse> CreateClientAsync(
         CreateClientRequest request,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
-        CreateCompanyClientDto? companyInformation = request.CompanyInformation;
-        CreateIndividualClientDto? individualInformation = request.IndividualInformation;
+        var companyInfo = request.CompanyInformation;
+        var individualInfo = request.IndividualInformation;
 
-        if (companyInformation != null && individualInformation != null)
-            throw new BadRequestException("Can't create Client of type Individual and Company at the same time.");
-
-        if (companyInformation == null && individualInformation == null)
+        if (companyInfo != null && individualInfo != null)
+            throw new BadRequestException("Client can't be both Individual and Company.");
+    
+        if (companyInfo == null && individualInfo == null)
             throw new BadRequestException("Client type must be provided.");
 
         await ValidateUniquenessOfEmail(request.Email, cancellationToken);
         await ValidateUniquenessOfPhone(request.PhoneNumber, cancellationToken);
 
-        int createdId = 0;
+        if (individualInfo != null)
+            return await CreateIndividualClientAsync(request, cancellationToken);
 
-        // ---- for individual ----
-        if (individualInformation != null)
-        {
-            string pesel = individualInformation.PESEL;
-            await ValidateUniquenessOfPesel(pesel, cancellationToken);
-
-            await _unitOfWork.StartTransactionAsync(cancellationToken);
-            try
-            {
-                Client? createdClient = await InsertBaseClientAsync(request, cancellationToken);
-                createdId = createdClient.Id;
-                IndividualClient? createdIndividual =
-                    await InsertIndividualClientAsync(request, createdId, cancellationToken);
-                createdClient.IndividualClient = createdIndividual;
-                await _unitOfWork.CommitTransactionAsync(cancellationToken);
-                return await GetClientByIdAsync(createdId, cancellationToken);
-            }
-            catch
-            {
-                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
-                throw;
-            }
-        }
-
-        // ---- for company ----
-        else if (companyInformation != null)
-        {
-            string krs = companyInformation.KRS;
-            await ValidateUniquenessOfKrs(krs, cancellationToken);
-
-            await _unitOfWork.StartTransactionAsync(cancellationToken);
-            try
-            {
-                Client? createdClient = await InsertBaseClientAsync(request, cancellationToken);
-                createdId = createdClient.Id;
-                CompanyClient? createdCompany = await InsertCompanyClientAsync(request, createdId, cancellationToken);
-                createdClient.CompanyClient = createdCompany;
-                await _unitOfWork.CommitTransactionAsync(cancellationToken);
-                return await GetClientByIdAsync(createdId, cancellationToken);
-            }
-            catch
-            {
-                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
-                throw;
-            }
-        }
-
-        throw new Exception("Client could not be created.");
+        return await CreateCompanyClientAsync(request, cancellationToken);
     }
+    
+    private async Task<GetClientResponse> CreateIndividualClientAsync(
+        CreateClientRequest request,
+        CancellationToken cancellationToken)
+    {
+        var individual = request.IndividualInformation!;
+        await ValidateUniquenessOfPesel(individual.PESEL, cancellationToken);
+
+        await _unitOfWork.StartTransactionAsync(cancellationToken);
+        try
+        {
+            var baseClient = await InsertBaseClientAsync(request, cancellationToken);
+            var individualClient = await InsertIndividualClientAsync(request, baseClient.Id, cancellationToken);
+            baseClient.IndividualClient = individualClient;
+
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+            return await GetClientByIdAsync(baseClient.Id, cancellationToken);
+        }
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
+    }
+
+    private async Task<GetClientResponse> CreateCompanyClientAsync(
+        CreateClientRequest request,
+        CancellationToken cancellationToken)
+    {
+        var company = request.CompanyInformation!;
+        await ValidateUniquenessOfKrs(company.KRS, cancellationToken);
+
+        await _unitOfWork.StartTransactionAsync(cancellationToken);
+        try
+        {
+            var baseClient = await InsertBaseClientAsync(request, cancellationToken);
+            var companyClient = await InsertCompanyClientAsync(request, baseClient.Id, cancellationToken);
+            baseClient.CompanyClient = companyClient;
+
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+            return await GetClientByIdAsync(baseClient.Id, cancellationToken);
+        }
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
+    }
+
+
 
     public async Task<bool> RemoveClientAsync(
         int id,
@@ -333,6 +356,7 @@ public class ClientService : IClientService
             Address = client.Address,
             Email = client.Email,
             PhoneNumber = client.PhoneNumber,
+            IsLoyal = client.IsLoyal,
             CompanyInformation = company == null
                 ? null
                 : new GetCompanyClientDto()

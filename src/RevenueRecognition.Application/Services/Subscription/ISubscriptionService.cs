@@ -1,7 +1,8 @@
-using RevenueRecognition.Application.DTOs.Payment;
-using RevenueRecognition.Application.DTOs.Subscription;
-
 namespace RevenueRecognition.Application.Services.Subscription;
+
+using DTOs.Payment;
+using DTOs.Subscription;
+using Models.Subscription;
 
 public interface ISubscriptionService
 {
@@ -9,9 +10,14 @@ public interface ISubscriptionService
         CreateSubscriptionRequest request,
         CancellationToken cancellationToken
     );
+
     public Task<CreatePaymentRequest> IssuePaymentAsync(
         CreateSubscriptionRequest request,
         CancellationToken cancellationToken
     );
-    
+
+    public Task<List<Subscription>> GetSubscriptionsByClientIdAsync(
+        int clientId,
+        CancellationToken cancellationToken
+    );
 }

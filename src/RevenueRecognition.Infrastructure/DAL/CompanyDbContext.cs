@@ -135,8 +135,8 @@ public class CompanyDbContext : DbContext
         modelBuilder.Entity<Discount>().HasData(
             new Discount
             {
-                Id = 1, Name = "Loyal Customer Discount", StartDate = new DateTime(2000, 1, 1),
-                EndDate = new DateTime(2029, 12, 31), Value = 5m
+                Id = 1, Name = "Loyal Customer Discount", StartDate = null,
+                EndDate = null, Value = 5m
             },
             new Discount
             {

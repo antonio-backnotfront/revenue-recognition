@@ -17,4 +17,9 @@ public class DiscountService : IDiscountService
     {
         return await _repository.GetHighestDiscountByDateAsync(date, cancellationToken);
     }
+
+    public async Task<Discount?> GetLoyalClientDiscountAsync(CancellationToken cancellationToken)
+    {
+        return await _repository.GetLoyalClientDiscountAsync(cancellationToken);
+    }
 }

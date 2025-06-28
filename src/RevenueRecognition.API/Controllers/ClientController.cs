@@ -52,7 +52,6 @@ public class ClientController : ControllerBase
     )
     {
         GetClientResponse createdClient = await _service.CreateClientAsync(request, cancellationToken);
-        _logger.LogInformation("Created client: {@Created}", createdClient);
         return CreatedAtAction(nameof(GetClientByIdAsync), new { Id = createdClient.Id }, createdClient);
     }
 
@@ -66,8 +65,8 @@ public class ClientController : ControllerBase
         GetClientResponse updatedClient = await _service.UpdateClientAsync(id, dto, cancellationToken);
         return Ok(updatedClient);
     }
+
     [HttpDelete("{id}")]
-    
     public async Task<IActionResult> UpdateClientAsync(
         int id,
         CancellationToken cancellationToken
