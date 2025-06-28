@@ -39,12 +39,12 @@ Historically, flawed revenue recognition has fueled major corporate scandals, in
 <h2 align="center"> 📑 Table of Contents </h2>
 
 <p>
-    <a href="-database-schema">Database Schema</a> •
-    <a href="-api-endpoints">API Endpoints</a> •
-    <a href="-request-and-response-bodies">Request and Response Bodies</a> •
-    <a href="-usage">Usage</a> •
-    <a href="-technologies">Technologies</a> •
-    <a href="-license">Licence</a>
+    <a href="https://github.com/antonio-backnotfront/revenue-recognition?tab=readme-ov-file#-database-schema">Database Schema</a> •
+    <a href="https://github.com/antonio-backnotfront/revenue-recognition?tab=readme-ov-file#-api-endpoints">API Endpoints</a> •
+    <a href="https://github.com/antonio-backnotfront/revenue-recognition?tab=readme-ov-file#-request-and-response-bodies">Request and Response Bodies</a> •
+    <a href="https://github.com/antonio-backnotfront/revenue-recognition?tab=readme-ov-file#-usage">Usage</a> •
+    <a href="https://github.com/antonio-backnotfront/revenue-recognition?tab=readme-ov-file#-technologies">Technologies</a> •
+    <a href="https://github.com/antonio-backnotfront/revenue-recognition?tab=readme-ov-file#-license">Licence</a>
 
 </p>
 
@@ -95,3 +95,10 @@ Historically, flawed revenue recognition has fueled major corporate scandals, in
 }
 
 ```
+
+---
+## 💻 Technologies
+
+---
+
+## 📄 License
