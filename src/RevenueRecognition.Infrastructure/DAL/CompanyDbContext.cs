@@ -193,8 +193,8 @@ public class CompanyDbContext : DbContext
         );
 
         modelBuilder.Entity<RenewalPeriod>().HasData(
-            new RenewalPeriod { Id = 1, Name = "Monthly" },
-            new RenewalPeriod { Id = 2, Name = "Yearly" }
+            new RenewalPeriod { Id = 1, Name = "Monthly", Days = 30},
+            new RenewalPeriod { Id = 2, Name = "Yearly", Days = 365}
         );
 
         modelBuilder.Entity<Subscription>().HasData(

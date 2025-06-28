@@ -119,9 +119,7 @@ public class SubscriptionService : ISubscriptionService
         }
     }
 
-    // TODO
-    // TODO
-    // TODO
+    // user must pay on the first day of the new renewal period
     public async Task<CreateSubscriptionPaymentResponse> IssuePaymentByIdOrThrowAsync(
         int id,
         CreatePaymentRequest request,
