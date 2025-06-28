@@ -1,12 +1,9 @@
-using RevenueRecognition.Application.DTOs.Subscription;
-using RevenueRecognition.Application.Services.Subscription;
-
 namespace RevenueRecognition.API.Controllers;
 
-using Application.DTOs.Contract;
+using Application.DTOs.Subscription;
+using Application.Services.Subscription;
 using Application.DTOs.Payment;
 using Microsoft.AspNetCore.Mvc;
-using Application.Services.Contract;
 
 [ApiController]
 [Route("/api/subscriptions")]
@@ -31,7 +28,8 @@ public class SubscriptionController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        CreateSubscriptionResponse createdSubscription = await _service.CreateSubscriptionOrThrowAsync(request, cancellationToken);
+        CreateSubscriptionResponse createdSubscription =
+            await _service.CreateSubscriptionOrThrowAsync(request, cancellationToken);
         return StatusCode(201, createdSubscription);
     }
 

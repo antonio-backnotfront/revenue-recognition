@@ -1,8 +1,7 @@
-using RevenueRecognition.Application.DTOs.Contract;
-using RevenueRecognition.Application.DTOs.Payment;
-
 namespace RevenueRecognition.API.Controllers;
 
+using Application.DTOs.Contract;
+using Application.DTOs.Payment;
 using Microsoft.AspNetCore.Mvc;
 using Application.Services.Contract;
 
@@ -32,7 +31,7 @@ public class ContractController : ControllerBase
         CreateContractResponse createdContract = await _service.CreateContractOrThrowAsync(request, cancellationToken);
         return StatusCode(201, createdContract);
     }
-    
+
     [HttpPost("{contractId}/issue-payment")]
     public async Task<IActionResult> CreateContractAsync(
         int contractId,
@@ -40,10 +39,11 @@ public class ContractController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        CreateContractPaymentResponse createdContractPayment = await _service.IssuePaymentByIdOrThrowAsync(contractId, request, cancellationToken);
+        CreateContractPaymentResponse createdContractPayment =
+            await _service.IssuePaymentByIdOrThrowAsync(contractId, request, cancellationToken);
         return StatusCode(201, createdContractPayment);
     }
-    
+
     [HttpDelete("{contractId}")]
     public async Task<IActionResult> DeleteContractAsync(
         int contractId,

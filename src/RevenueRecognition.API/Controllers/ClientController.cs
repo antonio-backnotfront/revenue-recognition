@@ -1,8 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
-using RevenueRecognition.Application.DTOs.Client;
-using RevenueRecognition.Application.Services.Client;
-
 namespace RevenueRecognition.API.Controllers;
+
+using Microsoft.AspNetCore.Mvc;
+using Application.DTOs.Client;
+using Application.Services.Client;
 
 [ApiController]
 [Route("/api/clients")]
