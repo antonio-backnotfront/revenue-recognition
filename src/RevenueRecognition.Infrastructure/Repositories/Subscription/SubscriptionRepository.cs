@@ -25,6 +25,7 @@ public class SubscriptionRepository : ISubscriptionRepository
     {
         return await _context.Subscriptions
             .Include(s => s.Software)
+            .Include(s => s.RenewalPeriod)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
@@ -76,6 +77,12 @@ public class SubscriptionRepository : ISubscriptionRepository
             .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
     }
 
+    public Task ChangeSubscriptionStatusAsync(Subscription subscription, int status, CancellationToken cancellationToken)
+    {
+        subscription.SubscriptionStatusId = status;
+        return _context.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task<int?> GetSubscriptionStatusIdByNameAsync(string name, CancellationToken cancellationToken)
     { 
         return await _context.SubscriptionStatuses
@@ -89,6 +96,17 @@ public class SubscriptionRepository : ISubscriptionRepository
     )
     {
         return await _context.SubscriptionPayments.ToListAsync(cancellationToken);
+    }
+    
+    public async Task<SubscriptionPayment?> GetLastPaymentBySubscriptionIdAsync(
+        int subscriptionId,
+        CancellationToken cancellationToken
+    )
+    {
+        return await _context.SubscriptionPayments
+            .Where(p => p.SubscriptionId == subscriptionId)
+            .OrderByDescending(e => e.PaidAt)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<List<SubscriptionPayment>> GetAllPaymentsBySoftwareIdAsync(

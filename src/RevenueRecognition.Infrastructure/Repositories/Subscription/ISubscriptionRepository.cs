@@ -18,12 +18,23 @@ public interface ISubscriptionRepository
         DiscountSubscription discountSubscription,
         CancellationToken cancellationToken
     );
-    
+
     public Task<RenewalPeriod?> GetRenewalPeriodByIdAsync(
         int id,
         CancellationToken cancellationToken
     );
+
+    public Task<SubscriptionPayment?> GetLastPaymentBySubscriptionIdAsync(
+        int subscriptionId,
+        CancellationToken cancellationToken
+    );
     
+    public Task ChangeSubscriptionStatusAsync(
+        Subscription subscription,
+        int status,
+        CancellationToken cancellationToken
+    );
+
     public Task<int?> GetSubscriptionStatusIdByNameAsync(string name, CancellationToken cancellationToken);
 
     public Task<List<SubscriptionPayment>> GetAllPaymentsAsync(CancellationToken cancellationToken);

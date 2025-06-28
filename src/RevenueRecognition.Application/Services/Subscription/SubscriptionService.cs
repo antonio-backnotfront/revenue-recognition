@@ -26,90 +26,67 @@ public class SubscriptionService : ISubscriptionService
         ISoftwareService softwareService,
         IUnitOfWork unitOfWork,
         IClientService clientService,
-        IDiscountService discountService
-    )
+        IDiscountService discountService)
     {
-        _softwareService = softwareService;
         _repository = subscriptionRepository;
+        _softwareService = softwareService;
         _unitOfWork = unitOfWork;
         _clientService = clientService;
         _discountService = discountService;
     }
 
-
-
     public async Task<CreateSubscriptionResponse> CreateSubscriptionOrThrowAsync(
         CreateSubscriptionRequest request,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
-        Software software = await _softwareService.GetSoftwareByIdOrThrowAsync(
-            request.SoftwareId,
-            cancellationToken
-        );
+        var software = await _softwareService.GetSoftwareByIdOrThrowAsync(request.SoftwareId, cancellationToken);
+        var client = await _clientService.GetClientByIdOrThrowAsync(request.ClientId, cancellationToken);
+        var renewalPeriod = await GetRenewalPeriodByIdOrThrowAsync(request.RenewalPeriodId, cancellationToken);
+        var activeStatusId = await GetSubscriptionStatusIdByNameOrThrowAsync(Enums.SubscriptionStatus.Active, cancellationToken);
 
-        GetClientResponse client = await _clientService.GetClientByIdOrThrowAsync(
-            request.ClientId,
-            cancellationToken
-        );
+        bool hasActive = (await GetSubscriptionsByClientIdAsync(client.Id, cancellationToken))
+            .Any(s => s.SoftwareId == software.Id && s.SubscriptionStatusId == activeStatusId);
 
-        int activeSubscriptionStatus = await GetSubscriptionStatusIdByNameOrThrowAsync(
-            Enums.SubscriptionStatus.Active,
-            cancellationToken
-        );
-
-        bool alreadyHasActiveSubscription = (await GetSubscriptionsByClientIdAsync(
-                client.Id,
-                cancellationToken
-            ))
-            .Any(s =>
-                s.SubscriptionStatusId == activeSubscriptionStatus &&
-                s.SoftwareId == software.Id);
-        if (alreadyHasActiveSubscription)
+        if (hasActive)
             throw new AlreadyExistsException("Client already has an active subscription for this software.");
 
-        RenewalPeriod renewalPeriod =
-            await GetRenewalPeriodByIdOrThrowAsync(request.RenewalPeriodId, cancellationToken);
+        decimal monthlyPrice = software.Cost / 12m;
+        decimal basePrice = monthlyPrice * Math.Floor(renewalPeriod.Days / 30m);
+        var renewalPrice = await CalculateDiscountedRenewalPriceAsync(basePrice, client.IsLoyal, cancellationToken);
+        var firstPayment = await CalculateDiscountedFirstPriceAsync(basePrice, client.IsLoyal, cancellationToken);
+
+        var subscription = new Subscription
+        {
+            SoftwareId = software.Id,
+            ClientId = client.Id,
+            RenewalPeriodId = renewalPeriod.Id,
+            SubscriptionStatusId = activeStatusId,
+            Price = renewalPrice,
+            RegisterDate = DateTime.Now
+        };
 
         await _unitOfWork.StartTransactionAsync(cancellationToken);
+
         try
         {
-            decimal basePricePerMonth = software.Cost / 12;
-            decimal renewalPayment =
-                await CalculateDiscountedRenewalPriceAsync(basePricePerMonth, client.IsLoyal, cancellationToken);
-            Subscription toInsertSubscription = new Subscription()
-            {
-                SoftwareId = software.Id,
-                ClientId = client.Id,
-                SubscriptionStatusId = activeSubscriptionStatus,
-                RenewalPeriodId = renewalPeriod.Id,
-                Price = renewalPayment,
-                RegisterDate = DateTime.Now,
-            };
-            Subscription? createdSubscription =
-                await _repository.InsertSubscriptionAsync(toInsertSubscription, cancellationToken);
-            if (createdSubscription == null)
-                throw new Exception($"Unable to create subscription for {request}.");
+            var created = await _repository.InsertSubscriptionAsync(subscription, cancellationToken)
+                          ?? throw new Exception("Unable to create subscription.");
 
-            decimal firstPayment =
-                await CalculateDiscountedFirstPriceAsync(basePricePerMonth, client.IsLoyal, cancellationToken);
-            await InsertPaymentBySubscriptionIdOrThrowAsync(createdSubscription.Id, firstPayment, cancellationToken);
-
-            await AttachApplicableDiscountsOrThrowAsync(createdSubscription.Id, client.IsLoyal, cancellationToken);
+            await InsertPaymentBySubscriptionIdOrThrowAsync(created.Id, firstPayment, cancellationToken);
+            await AttachApplicableDiscountsOrThrowAsync(created.Id, client.IsLoyal, cancellationToken);
             await _clientService.SetIsClientLoyalByIdOrThrowAsync(client.Id, true, cancellationToken);
 
-            
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
 
-            return new CreateSubscriptionResponse()
+            return new CreateSubscriptionResponse
             {
-                Id = createdSubscription.Id,
-                SoftwareId = createdSubscription.SoftwareId,
-                ClientId = createdSubscription.ClientId,
-                SubscriptionStatusId = createdSubscription.SubscriptionStatusId,
-                RenewalPeriodId = createdSubscription.RenewalPeriodId,
-                Price = createdSubscription.Price,
-                RegisterDate = createdSubscription.RegisterDate
+                Id = created.Id,
+                SoftwareId = created.SoftwareId,
+                ClientId = created.ClientId,
+                RenewalPeriodId = created.RenewalPeriodId,
+                SubscriptionStatusId = created.SubscriptionStatusId,
+                Price = created.Price,
+                RegisterDate = created.RegisterDate
             };
         }
         catch
@@ -119,57 +96,97 @@ public class SubscriptionService : ISubscriptionService
         }
     }
 
-    // user must pay on the first day of the new renewal period
     public async Task<CreateSubscriptionPaymentResponse> IssuePaymentByIdOrThrowAsync(
-        int id,
+        int subscriptionId,
         CreatePaymentRequest request,
-        CancellationToken cancellationToken
-    )
-    {
-        throw new NotImplementedException();
-    }
-
-    private async Task InsertPaymentBySubscriptionIdOrThrowAsync(int id, decimal amount,
         CancellationToken cancellationToken)
     {
-        _ = await _repository.InsertPaymentAsync(
-            new SubscriptionPayment()
-            {
-                SubscriptionId = id,
-                Amount = amount,
-                PaidAt = DateTime.Now,
-            }, cancellationToken
-        ) ?? throw new Exception("Unable to insert subscription payment.");
+        var subscription = await _repository.GetSubscriptionByIdAsync(subscriptionId, cancellationToken)
+                            ?? throw new NotFoundException($"Subscription with id {subscriptionId} not found.");
+
+        int activeStatusId = await GetSubscriptionStatusIdByNameOrThrowAsync(Enums.SubscriptionStatus.Active, cancellationToken);
+        if (subscription.SubscriptionStatusId != activeStatusId)
+            throw new BadRequestException("Subscription is not active.");
+
+        var lastPayment = await _repository.GetLastPaymentBySubscriptionIdAsync(subscriptionId, cancellationToken)
+                         ?? throw new Exception("Missing initial payment record.");
+
+        var renewalDays = subscription.RenewalPeriod.Days;
+        var nextDueDate = lastPayment.PaidAt.Date.AddDays(renewalDays);
+        var today = DateTime.Today;
+
+        if (today < nextDueDate)
+            throw new BadRequestException("Too early to pay for the next renewal period.");
+
+        if (today > nextDueDate)
+        {
+            var suspendedId = await GetSubscriptionStatusIdByNameOrThrowAsync(Enums.SubscriptionStatus.Suspended, cancellationToken);
+            await _repository.ChangeSubscriptionStatusAsync(subscription, suspendedId, cancellationToken);
+            throw new BadRequestException("Subscription was suspended due to missed payment.");
+        }
+
+        if (request.Amount != subscription.Price)
+            throw new BadRequestException($"Incorrect payment amount. Expected: {subscription.Price}");
+
+        var payment = await InsertPaymentBySubscriptionIdOrThrowAsync(subscriptionId, request.Amount, cancellationToken);
+
+        return new CreateSubscriptionPaymentResponse
+        {
+            Id = payment.Id,
+            SubscriptionId = subscription.Id,
+            Amount = payment.Amount,
+            DateOfPayment = payment.PaidAt
+        };
     }
 
     public async Task<List<Subscription>> GetSubscriptionsByClientIdAsync(
         int clientId,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
         return await _repository.GetAllSubscriptionsByClientIdAsync(clientId, cancellationToken);
     }
 
+    private async Task<SubscriptionPayment> InsertPaymentBySubscriptionIdOrThrowAsync(
+        int subscriptionId,
+        decimal amount,
+        CancellationToken ct)
+    {
+        return await _repository.InsertPaymentAsync(new SubscriptionPayment
+        {
+            SubscriptionId = subscriptionId,
+            Amount = amount,
+            PaidAt = DateTime.Today
+        }, ct) ?? throw new Exception("Failed to insert subscription payment.");
+    }
+
+    private async Task AttachApplicableDiscountsOrThrowAsync(int subscriptionId, bool isLoyal, CancellationToken ct)
+    {
+        var loyaltyDiscount = isLoyal ? await _discountService.GetLoyalClientDiscountAsync(ct) : null;
+        if (loyaltyDiscount != null)
+        {
+            await _repository.InsertSubscriptionDiscountAsync(new DiscountSubscription
+            {
+                SubscriptionId = subscriptionId,
+                DiscountId = loyaltyDiscount.Id
+            }, ct);
+        }
+    }
+
     private async Task<int> GetSubscriptionStatusIdByNameOrThrowAsync(
         Enums.SubscriptionStatus status,
-        CancellationToken ct
-    )
+        CancellationToken ct)
     {
         var id = await _repository.GetSubscriptionStatusIdByNameAsync(status.ToString(), ct);
-        return id ?? throw new NotFoundException($"Error while getting contract status '{status}'");
+        return id ?? throw new NotFoundException($"Subscription status '{status}' not found.");
     }
 
-    private async Task<RenewalPeriod> GetRenewalPeriodByIdOrThrowAsync(
-        int id,
-        CancellationToken ct
-    )
+    private async Task<RenewalPeriod> GetRenewalPeriodByIdOrThrowAsync(int id, CancellationToken ct)
     {
-        RenewalPeriod? renewalPeriod = await _repository.GetRenewalPeriodByIdAsync(id, ct);
-        return renewalPeriod ?? throw new NotFoundException($"Renewal period with id {id} not found.");
+        var period = await _repository.GetRenewalPeriodByIdAsync(id, ct);
+        return period ?? throw new NotFoundException($"Renewal period with id {id} not found.");
     }
 
-    private async Task<decimal> CalculateDiscountedFirstPriceAsync(decimal basePrice, bool isLoyal,
-        CancellationToken ct)
+    private async Task<decimal> CalculateDiscountedFirstPriceAsync(decimal basePrice, bool isLoyal, CancellationToken ct)
     {
         var discount = await _discountService.GetDiscountByDateAsync(DateTime.Now, ct);
         var loyaltyDiscount = isLoyal ? await _discountService.GetLoyalClientDiscountAsync(ct) : null;
@@ -180,20 +197,9 @@ public class SubscriptionService : ISubscriptionService
         return total;
     }
 
-    private async Task<decimal> CalculateDiscountedRenewalPriceAsync(decimal basePrice, bool isLoyal,
-        CancellationToken ct)
+    private async Task<decimal> CalculateDiscountedRenewalPriceAsync(decimal basePrice, bool isLoyal, CancellationToken ct)
     {
         var loyaltyDiscount = isLoyal ? await _discountService.GetLoyalClientDiscountAsync(ct) : null;
-        if (loyaltyDiscount != null) return basePrice * (100 - loyaltyDiscount.Value) / 100;
-        return basePrice;
-    }
-
-    private async Task AttachApplicableDiscountsOrThrowAsync(int subscriptionId, bool isLoyal, CancellationToken ct)
-    {
-        var loyaltyDiscount = isLoyal ? await _discountService.GetLoyalClientDiscountAsync(ct) : null;
-
-        if (loyaltyDiscount != null)
-            await _repository.InsertSubscriptionDiscountAsync(
-                new DiscountSubscription { DiscountId = loyaltyDiscount.Id, SubscriptionId = subscriptionId }, ct);
+        return loyaltyDiscount != null ? basePrice * (100 - loyaltyDiscount.Value) / 100 : basePrice;
     }
 }
