@@ -38,7 +38,7 @@ Historically, flawed revenue recognition has fueled major corporate scandals, in
 
 <h2 align="center"> 📑 Table of Contents </h2>
 
-<p>
+<p align="center">
     <a href="https://github.com/antonio-backnotfront/revenue-recognition?tab=readme-ov-file#-database-schema">Database Schema</a> •
     <a href="https://github.com/antonio-backnotfront/revenue-recognition?tab=readme-ov-file#-api-endpoints">API Endpoints</a> •
     <a href="https://github.com/antonio-backnotfront/revenue-recognition?tab=readme-ov-file#-request-and-response-bodies">Request and Response Bodies</a> •
