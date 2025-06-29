@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using RevenueRecognition.API.Middlewares;
 using RevenueRecognition.Application.Services.Client;
 using RevenueRecognition.Application.Services.Contract;
+using RevenueRecognition.Application.Services.Currency;
 using RevenueRecognition.Application.Services.Discount;
 using RevenueRecognition.Application.Services.Revenue;
 using RevenueRecognition.Application.Services.Software;
@@ -37,6 +38,8 @@ builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<IDiscountRepository, DiscountRepository>();
 builder.Services.AddScoped<IContractRepository, ContractRepository>();
 builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+
+builder.Services.AddHttpClient<ICurrencyConverterService, CurrencyConverterService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultDatabase");
 builder.Services.AddDbContext<CompanyDbContext>(options => options

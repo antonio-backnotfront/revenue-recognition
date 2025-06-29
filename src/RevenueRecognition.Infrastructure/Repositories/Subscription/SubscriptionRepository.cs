@@ -18,6 +18,7 @@ public class SubscriptionRepository : ISubscriptionRepository
     {
         return await _context.Subscriptions
             .Include(s => s.Software)
+            .Include(x => x.RenewalPeriod)
             .ToListAsync(cancellationToken);
     }
 
@@ -37,6 +38,15 @@ public class SubscriptionRepository : ISubscriptionRepository
         return await _context.Subscriptions
             .Include(x => x.SubscriptionStatus)
             .Where(x => x.ClientId == id)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<Subscription>> GetAllSubscriptionsBySoftwareIdAsync(int id, CancellationToken cancellationToken)
+    {
+        return await _context.Subscriptions
+            .Include(x => x.SubscriptionStatus)
+            .Include(x => x.RenewalPeriod)
+            .Where(x => x.SoftwareId == id)
             .ToListAsync(cancellationToken);
     }
 

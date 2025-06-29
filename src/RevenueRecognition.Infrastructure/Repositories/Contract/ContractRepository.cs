@@ -64,12 +64,15 @@ public class ContractRepository : IContractRepository
         CancellationToken cancellationToken
     )
     {
-        return await _context.Contracts.ToListAsync(cancellationToken);
+        return await _context.Contracts
+            .Include(c => c.ContractStatus)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<List<Contract>> GetAllContractsBySoftwareIdAsync(int softwareId, CancellationToken cancellationToken)
     {
         return await _context.Contracts
+            .Include(c => c.ContractStatus)
             .Where(c => c.SoftwareVersion.SoftwareId == softwareId)
             .ToListAsync(cancellationToken);
     }
