@@ -40,6 +40,14 @@ company policies—making accurate tracking a complex but crucial task.
 Historically, flawed revenue recognition has fueled major corporate scandals, including Enron and WorldCom, causing
 severe financial and legal repercussions. Reliable revenue recognition systems ensure transparency and uphold trust in
 financial markets.
+---
+
+
+<h3 align="center"> ⚙ UPD:️ How does the process of revenue recognition work</h3>
+<p align="center">BackgroundService called StatusMonitoringWorker is monitoring the database every 10 seconds and 
+if detects any unpaid contract, which according to its startDate and endDate should have been already paid,
+cancels it immediately. Same work for subscriptions, the client should renew the subscription (issue a payment) 
+during the first 3 days of the next renewal period. </p>
 
 ---
 
