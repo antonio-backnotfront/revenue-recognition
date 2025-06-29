@@ -110,8 +110,8 @@ public class SubscriptionService : ISubscriptionService
         if (subscription.SubscriptionStatusId != activeStatusId)
             throw new BadRequestException("Subscription is not active.");
 
-        var lastPayment = await _repository.GetLastPaymentBySubscriptionIdAsync(subscriptionId, cancellationToken)
-                          ?? throw new Exception("Missing initial payment record.");
+        var lastPayment = 
+            await GetLastPaymentBySubscriptionIdOrThrow(subscriptionId, cancellationToken);
 
         var renewalDays = subscription.RenewalPeriod.Days;
         var nextDueDate = lastPayment.PaidAt.Date.AddDays(renewalDays);
@@ -120,13 +120,6 @@ public class SubscriptionService : ISubscriptionService
         if (today < nextDueDate)
             throw new BadRequestException("Too early to pay for the next renewal period.");
 
-        if (today > nextDueDate)
-        {
-            var suspendedId =
-                await GetSubscriptionStatusIdByNameOrThrowAsync(Enums.SubscriptionStatus.Suspended, cancellationToken);
-            await _repository.ChangeSubscriptionStatusAsync(subscription, suspendedId, cancellationToken);
-            throw new BadRequestException("Subscription was suspended due to missed payment.");
-        }
 
         if (request.Amount != subscription.Price)
             throw new BadRequestException($"Incorrect payment amount. Expected: {subscription.Price}");
@@ -148,6 +141,37 @@ public class SubscriptionService : ISubscriptionService
         CancellationToken cancellationToken)
     {
         return await _repository.GetAllSubscriptionsByClientIdAsync(clientId, cancellationToken);
+    }
+    
+    
+
+    public async Task<List<Subscription>> GetActiveSubscriptionsAsync(CancellationToken cancellationToken)
+    {
+        int activeStatusId = await GetSubscriptionStatusIdByNameOrThrowAsync(Enums.SubscriptionStatus.Active, cancellationToken);
+        return (await _repository.GetAllSubscriptionsAsync(cancellationToken))
+            .Where(s => s.SubscriptionStatusId == activeStatusId)
+            .ToList();
+    }
+
+    public async Task SetSubscriptionSuspendedAsync(Subscription subscription, CancellationToken cancellationToken)
+    {
+        int suspendedStatusId = await GetSubscriptionStatusIdByNameOrThrowAsync(Enums.SubscriptionStatus.Suspended, cancellationToken);
+        await _repository.SetSubscriptionStatusAsync(subscription, suspendedStatusId, cancellationToken);
+    }
+
+    public async Task SetSubscriptionActiveAsync(Subscription subscription, CancellationToken cancellationToken)
+    {
+        int activeStatusId = await GetSubscriptionStatusIdByNameOrThrowAsync(Enums.SubscriptionStatus.Active, cancellationToken);
+        await _repository.SetSubscriptionStatusAsync(subscription, activeStatusId, cancellationToken);
+    }
+
+    public async Task<SubscriptionPayment> GetLastPaymentBySubscriptionIdOrThrow(int subscriptionId, CancellationToken cancellationToken)
+    {
+        SubscriptionPayment? lastPayment = 
+                await _repository.GetLastPaymentBySubscriptionIdAsync(subscriptionId, cancellationToken);
+        if (lastPayment == null)
+            throw new NotFoundException($"No payment for subscription id {subscriptionId} found.");
+        return lastPayment;
     }
 
     private async Task<SubscriptionPayment> InsertPaymentBySubscriptionIdOrThrowAsync(

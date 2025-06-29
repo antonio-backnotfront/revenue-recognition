@@ -152,6 +152,32 @@ public class ContractService : IContractService
         }
     }
 
+    public async Task<List<Contract>> GetAllActiveContractsAsync(CancellationToken cancellationToken)
+    {
+        int activeStatusId = await GetContractStatusIdOrThrowAsync(Enums.ContractStatus.Active, cancellationToken);
+        return (await _repository.GetAllContractsAsync(cancellationToken))
+            .Where(x => activeStatusId == x.ContractStatus.Id)
+            .ToList();
+    }
+
+    public async Task SetContractCancelledAsync(Contract contract, CancellationToken cancellationToken)
+    {
+        int cancelStatusId = await GetContractStatusIdOrThrowAsync(Enums.ContractStatus.Cancelled, cancellationToken);
+        await _repository.SetContractStatusAsync(contract, cancelStatusId, cancellationToken);
+    }
+
+    public async Task SetContractActiveAsync(Contract contract, CancellationToken cancellationToken)
+    {
+        int activeStatusId = await GetContractStatusIdOrThrowAsync(Enums.ContractStatus.Active, cancellationToken);
+        await _repository.SetContractStatusAsync(contract, activeStatusId, cancellationToken);
+    }
+
+    public async Task SetContractPaidAsync(Contract contract, CancellationToken cancellationToken)
+    {
+        int paidStatusId = await GetContractStatusIdOrThrowAsync(Enums.ContractStatus.Paid, cancellationToken);
+        await _repository.SetContractStatusAsync(contract, paidStatusId, cancellationToken);
+    }
+
     private async Task ValidateNoActiveContractOrSubscription(int clientId, int softwareVersionId, CancellationToken ct)
     {
         var contracts =
@@ -255,11 +281,7 @@ public class ContractService : IContractService
         var totalPaid = contract.Paid + amount;
         if (totalPaid < contract.Price) return;
 
-        var paidStatusId = await _repository.GetContractStatusIdByNameAsync(Enums.ContractStatus.Paid.ToString(), ct);
-        if (paidStatusId == null)
-            throw new Exception("Error while getting 'Paid' contract status.");
-
-        await _repository.SetContractStatusAsync(contract, paidStatusId.Value, ct);
+        await SetContractPaidAsync(contract, ct);
 
         if (!await _clientService.IsClientLoyalByIdOrThrowAsync(contract.ClientId, ct))
         {

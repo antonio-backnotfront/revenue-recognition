@@ -87,10 +87,10 @@ public class SubscriptionRepository : ISubscriptionRepository
             .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
     }
 
-    public Task ChangeSubscriptionStatusAsync(Subscription subscription, int status, CancellationToken cancellationToken)
+    public async Task SetSubscriptionStatusAsync(Subscription subscription, int status, CancellationToken cancellationToken)
     {
         subscription.SubscriptionStatusId = status;
-        return _context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<int?> GetSubscriptionStatusIdByNameAsync(string name, CancellationToken cancellationToken)

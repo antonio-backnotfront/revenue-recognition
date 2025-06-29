@@ -8,7 +8,7 @@ public interface IContractRepository
     public Task<Contract?> InsertContractAsync(Contract contract, CancellationToken cancellationToken);
     public Task<ContractPayment?> InsertPaymentAsync(ContractPayment payment, CancellationToken cancellationToken);
 
-    public Task<bool> SetContractStatusAsync(Contract contract, int statusId, CancellationToken cancellationToken);
+    public Task SetContractStatusAsync(Contract contract, int statusId, CancellationToken cancellationToken);
     
     public Task<DiscountContract> InsertDiscountContractAsync(DiscountContract discountContract,
         CancellationToken cancellationToken);

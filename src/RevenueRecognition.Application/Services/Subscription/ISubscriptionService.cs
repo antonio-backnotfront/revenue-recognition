@@ -21,4 +21,21 @@ public interface ISubscriptionService
         int clientId,
         CancellationToken cancellationToken
     );
+
+    public Task<List<Subscription>> GetActiveSubscriptionsAsync(
+        CancellationToken cancellationToken
+    );
+
+    public Task SetSubscriptionSuspendedAsync(
+        Subscription subscription,
+        CancellationToken cancellationToken
+    );
+
+    public Task SetSubscriptionActiveAsync(
+        Subscription subscription,
+        CancellationToken cancellationToken
+    );
+
+    public Task<SubscriptionPayment> GetLastPaymentBySubscriptionIdOrThrow(int subscriptionId,
+        CancellationToken cancellationToken);
 }

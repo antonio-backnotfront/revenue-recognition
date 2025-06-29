@@ -44,11 +44,10 @@ public class ContractRepository : IContractRepository
         return created;
     }
 
-    public async Task<bool> SetContractStatusAsync(Contract contract, int statusId, CancellationToken cancellationToken)
+    public async Task SetContractStatusAsync(Contract contract, int statusId, CancellationToken cancellationToken)
     {
         contract.ContractStatusId = statusId;
         await _context.SaveChangesAsync(cancellationToken);
-        return true;
     }
 
     public async Task<DiscountContract> InsertDiscountContractAsync(DiscountContract discountContract,

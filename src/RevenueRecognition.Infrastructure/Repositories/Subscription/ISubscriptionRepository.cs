@@ -30,7 +30,7 @@ public interface ISubscriptionRepository
         CancellationToken cancellationToken
     );
     
-    public Task ChangeSubscriptionStatusAsync(
+    public Task SetSubscriptionStatusAsync(
         Subscription subscription,
         int status,
         CancellationToken cancellationToken

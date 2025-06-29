@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RevenueRecognition.API.Middlewares;
 using RevenueRecognition.Application.Services.Auth;
+using RevenueRecognition.Application.Services.BackgroundJobs;
 using RevenueRecognition.Application.Services.Client;
 using RevenueRecognition.Application.Services.Contract;
 using RevenueRecognition.Application.Services.Currency;
@@ -49,6 +50,8 @@ builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<IDiscountRepository, DiscountRepository>();
 builder.Services.AddScoped<IContractRepository, ContractRepository>();
 builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+
+builder.Services.AddHostedService<StatusMonitoringWorker>();
 
 builder.Services.AddHttpClient<ICurrencyConverterService, CurrencyConverterService>();
 
