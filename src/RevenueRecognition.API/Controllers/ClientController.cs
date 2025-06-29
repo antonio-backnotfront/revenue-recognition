@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+
 namespace RevenueRecognition.API.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +22,7 @@ public class ClientController : ControllerBase
         _logger = logger;
     }
 
+    [Authorize(Roles = "Admin,User")]
     [HttpGet]
     public async Task<IActionResult> GetAllClientsAsync(
         CancellationToken cancellationToken
@@ -28,6 +31,7 @@ public class ClientController : ControllerBase
         return Ok(await _service.GetClientsAsync(cancellationToken));
     }
 
+    [Authorize(Roles = "Admin,User")]
     [HttpGet("{id}"), ActionName("GetClientByIdOrThrowAsync")]
     public async Task<IActionResult> GetClientByIdAsync(
         int id,
@@ -45,6 +49,7 @@ public class ClientController : ControllerBase
             });
     }
 
+    [Authorize(Roles = "Admin,User")]
     [HttpPost]
     public async Task<IActionResult> CreateClientAsync(
         CreateClientRequest request,
@@ -55,6 +60,7 @@ public class ClientController : ControllerBase
         return CreatedAtAction(nameof(GetClientByIdAsync), new { Id = createdClient.Id }, createdClient);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPatch("{id}")]
     public async Task<IActionResult> UpdateClientAsync(
         int id,
@@ -66,8 +72,9 @@ public class ClientController : ControllerBase
         return Ok(updatedClient);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
-    public async Task<IActionResult> UpdateClientAsync(
+    public async Task<IActionResult> DeleteClientAsync(
         int id,
         CancellationToken cancellationToken
     )

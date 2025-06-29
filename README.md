@@ -90,9 +90,19 @@ Historically, flawed revenue recognition has fueled major corporate scandals, in
   },
   "AllowedHosts": "*",
   "ConnectionStrings": {
-    "DefaultDatabase": "Server=your server;User ID=your user id;Password=your password;TrustServerCertificate=True;Database=your database"
+    "DefaultDatabase": "server = your server; user id = your user id; password = your password; TrustServerCertificate = True; database= your database"
+  },
+  "CurrencyApi": {
+    "key": "your api key"
+  },
+  "JwtConfig": {
+    "Issuer": "issuer",
+    "Audience": "audience",
+    "Key": "unique key consisting of 32 chars [a-zA-Z]",
+    "ValidInMinutes": "integer"
   }
 }
+
 
 ```
 

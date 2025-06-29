@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+
 namespace RevenueRecognition.API.Controllers;
 
 using Application.DTOs.Subscription;
@@ -5,6 +7,7 @@ using Application.Services.Subscription;
 using Application.DTOs.Payment;
 using Microsoft.AspNetCore.Mvc;
 
+[Authorize(Roles = "Admin,User")]
 [ApiController]
 [Route("/api/subscriptions")]
 public class SubscriptionController : ControllerBase

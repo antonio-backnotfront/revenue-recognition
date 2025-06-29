@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+
 namespace RevenueRecognition.API.Controllers;
 
 using Application.DTOs.Contract;
@@ -5,6 +7,7 @@ using Application.DTOs.Payment;
 using Microsoft.AspNetCore.Mvc;
 using Application.Services.Contract;
 
+[Authorize(Roles = "Admin,User")]
 [ApiController]
 [Route("/api/contracts")]
 public class ContractController : ControllerBase
