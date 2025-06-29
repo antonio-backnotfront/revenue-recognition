@@ -98,7 +98,7 @@ financial markets.
 
 <table>
 <tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Request Body</th><th>Response Body</th></tr>
-<tr><td>GET</td><td>/api/revenue</td><td>Get actual revenue (optionally filtered)</td><td>–</td><td>{ currentRevenue = 0m }</td></tr>
+<tr><td>GET</td><td>/api/revenue/current</td><td>Get actual revenue (optionally filtered)</td><td>–</td><td>{ currentRevenue = 0m }</td></tr>
 <tr><td>GET</td><td>/api/revenue/predicted</td><td>Get predicted revenue (actual + expected)</td><td>–</td><td>{ predictedRevenue = 0m }</td></tr>
 </table>
 
