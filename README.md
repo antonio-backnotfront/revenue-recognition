@@ -48,7 +48,7 @@ financial markets.
 <p align="center">
     <a href="https://github.com/antonio-backnotfront/revenue-recognition?tab=readme-ov-file#-database-schema">Database Schema</a> •
     <a href="https://github.com/antonio-backnotfront/revenue-recognition?tab=readme-ov-file#-api-endpoints">API Endpoints</a> •
-    <a href="https://github.com/antonio-backnotfront/revenue-recognition?tab=readme-ov-file#-request-and-response-bodies">Request and Response Bodies</a> •
+    <a href="https://github.com/antonio-backnotfront/revenue-recognition?tab=readme-ov-file#-dtos-as-json-examples">Request and Response Bodies</a> •
     <a href="https://github.com/antonio-backnotfront/revenue-recognition?tab=readme-ov-file#-usage">Usage</a> •
     <a href="https://github.com/antonio-backnotfront/revenue-recognition?tab=readme-ov-file#-technologies">Technologies</a> •
     <a href="https://github.com/antonio-backnotfront/revenue-recognition?tab=readme-ov-file#-license">Licence</a>
