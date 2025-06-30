@@ -25,7 +25,6 @@ public class AuthService : IAuthService
             .FirstOrDefaultAsync(acc => acc.Login == request.Username, cancellationToken);
         if (account == null) return null;
         var verificationResult = _passwordHasher.VerifyHashedPassword(account, account.Password, request.Password);
-        Console.WriteLine($"{_passwordHasher.HashPassword(account, account.Password)}");
 
         return verificationResult == PasswordVerificationResult.Success
             ? new AccountLoginResponse()
